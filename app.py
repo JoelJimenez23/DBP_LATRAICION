@@ -31,7 +31,7 @@ class User(db.Model):
     skins_hashes = db.Column(db.String(100),unique=False,nullable=True)
     e_mail = db.Column(db.String(100),primary_key=True,nullable=False,unique=True)
     password = db.Column(db.String(100),unique=False,nullable=False)
-    saldo = db.Column(db.Integer,nullable=False)
+    saldo = db.Column(db.Integer,nullable=True)
 
     def __init__(self,nickname,e_mail,saldo):
         self.nickname = nickname
