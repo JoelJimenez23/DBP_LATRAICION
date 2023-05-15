@@ -28,6 +28,7 @@ class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.String(36),primary_key=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
     nickname = db.Column(db.String(100),unique=False,nullable=False)
+    skins_hashes = db.Column(db.String(100),unique=False,nullable=True)
     e_mail = db.Column(db.String(100),primary_key=True,nullable=False,unique=True)
     password = db.Column(db.String(100),unique=False,nullable=False)
     saldo = db.Column(db.Integer,nullable=False)
@@ -37,6 +38,7 @@ class User(db.Model):
         self.e_mail = e_mail    
         self.saldo = saldo
         self.created_at = datetime.utcnow()
+
     def serialize(self):
         return{
             'id': self.id,
