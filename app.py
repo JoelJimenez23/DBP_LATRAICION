@@ -16,7 +16,9 @@ app = Flask(__name__)
 # db_uri = f
 # Configura la URI en la aplicación Flask
 # hola
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:546362@localhost:5432/skinloot"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:230204@localhost:5432/skinloot"
+app.config['UPLOAD_FOLDER'] = 'static/usuarios'
+
 
 db = SQLAlchemy(app)
 ALLOWED_EXTENSIONS = {'png','jpeg','jpg'}
@@ -30,17 +32,18 @@ class User(db.Model):
     skins_hashes = db.Column(db.String(100),nullable=True)
     e_mail = db.Column(db.String(100),primary_key=True,nullable=False,unique=True)
     password = db.Column(db.String(100),unique=False,nullable=False)
-    saldo = db.Column(db.Integer,nullable=True)
+    saldo = db.Column(db.Integer,nullable=True,server_default='0')
 
-    def __init__(self,nickname,e_mail,pasword):
+    def __init__(self,nickname,e_mail,password):
         self.nickname = nickname
         self.e_mail = e_mail    
-        self.password = pasword
+        self.password = password
 
     def serialize(self):
         return{
             'id': self.id,
             'nickname' : self.nickname,
+            'skin_hashes': self.skins_hashes,
             'e_mail' : self.e_mail,
             'password' : self.password,
             'saldo' : self.saldo,
@@ -48,7 +51,8 @@ class User(db.Model):
 
 
 #with app.app_context():db.create_all()
-with app.app_context():db.drop_all()
+with app.app_context():
+    db.create_all()
 # Empezamos las rutas:
 
 @app.route('/',methods=['GET'])
@@ -63,12 +67,34 @@ def register():
 def register_user():
     try:
         nickname  = request.form.get('nickname')
-        skins_hashes = request.form.get('skins_hashes')
         e_mail = request.form.get('e_mail')
-        password = request.form.get('saldo')
+        password = request.form.get('password')
 
+        user = User(nickname,e_mail,password)
+        db.session.add(user)
+        db.session.commit()
+
+        cwd = os.getcwd()
+
+
+        user_dir = os.path.join(app.config['UPLOAD_FOLDER'],user.id)
+        os.makedirs(user_dir,exist_ok=True)
+        upload_folder = os.path.join(cwd,user_dir)
+
+        # archivo = os.path.join(upload_folder,f'{user.id}.txt')
+        file  = open(f"{user_dir}/{user.id}.txt",'w')
+        file.close()
+        user.skins_hashes = f'{user.id}.txt'
+
+        db.session.commit()
+        return jsonify({'id':user.id,'succes':True,'message':'User created successfully!'})
     except Exception as e:
-
+        print(e)
+        print(sys.exc_info())
+        db.session.rollback()
+        return jsonify({'success':False,'message':'Error al crear el empleado'})
+    finally:
+        db.session.close()
 
 
 @app.route('/login',methods=['GET'])
