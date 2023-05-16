@@ -10,19 +10,10 @@ app = Flask(__name__)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-# ... Para que cada uno trabaje en su maquina: 
 
-# Obtiene el usuario y la contraseña de las variables de entorno
-# db_user = os.environ.get('DB_USER')
-# db_password = os.environ.get('DB_PASSWORD')
-
-# Construye la URI de la base de datos
-# db_uri = f
-# Configura la URI en la aplicación Flask
-# hola
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:230204@localhost:5432/skinloot"
 app.config['UPLOAD_FOLDER'] = 'static/usuarios'
-
+app.secret_key = 'clave'
 db = SQLAlchemy(app)
 ALLOWED_EXTENSIONS = {'png','jpeg','jpg'}
 
@@ -33,7 +24,8 @@ class User(UserMixin,db.Model):
     id = db.Column(db.String(36),primary_key=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
     nickname = db.Column(db.String(100),unique=False,nullable=False)
     skins_hashes = db.Column(db.String(100),unique=False,nullable=True)
-    e_mail = db.Column(db.String(100),primary_key=True,nullable=False,unique=True)
+    # e_mail = db.Column(db.String(100),primary_key=True,nullable=False,unique=True)
+    e_mail = db.Column(db.String(100),nullable=False,unique=True)
     password = db.Column(db.String(100),unique=False,nullable=False)
     saldo = db.Column(db.Integer,nullable=True,server_default='0')
     skins = db.relationship('Skin',backref='skin',lazy=True)
@@ -43,7 +35,9 @@ class User(UserMixin,db.Model):
         self.nickname = nickname
         self.e_mail = e_mail    
         self.password = password
-
+    
+    def get_id(self):
+        return self.id
     def serialize(self):
         return{
             'id': self.id,
@@ -67,6 +61,7 @@ class Skin(db.Model):
         self.name = name
         self.description = description
         self.price = price
+    
 
     def serialize(self):
         return{
@@ -77,91 +72,6 @@ class Skin(db.Model):
             'rarity' : self.rarity,
             'image_url' : self.image_url
         }
-
-# class PostSkin(db.Model):
-#     __tablename__ = 'post_skins'
-#     id = db.Column(db.String(36),primary_key=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
-#     skin_id = db.Column(db.String(36),db.ForeignKey('skins.id'),nullable=False)
-#     owner_id = db.Column(db.String(36),db.ForeignKey('users.id'),nullable=False)
-#     price = db.Column(db.Integer,nullable=True)
-
-#     skin = db.relationship('Skin',backref=db.backref('post_skins',lazy=True))
-#     owner = db.relationship('User',backref=db.backref('post_skins',lazy=True))
-
-#     def __init__(self,skin_id,owner_id):
-#         self.skin_id = skin_id
-#         self.owner_id = owner_id
-
-#     def serialize(self):
-#         return{
-#             'id': self.id,
-#             'skin_id' : self.skin_id,
-#             'owner_id' : self.owner_id
-#         }
-    
-# class Trade(db.Model):
-#     __tablename__ = 'trades'
-#     id = db.Column(db.String(36),primary_key=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
-#     sender_id = db.Column(db.String(36),db.ForeignKey('users.id'),nullable=False)
-#     receiver_id = db.Column(db.String(36),db.ForeignKey('users.id'),nullable=False)
-#     sender_skin = db.Column(db.String(36),db.ForeignKey('skins.id'),nullable=False)
-#     receiver_skin = db.Column(db.String(36),db.ForeignKey('skins.id'),nullable=False)
-#     date = db.Column(db.DateTime,nullable=False,default=datetime.utcnow)
-#     status = db.Column(db.String(20),nullable=False,default='pending')
-
-#     sender = db.relationship('User',foreign_keys=[sender_id],backref=db.backref('sent_trades',lazy=True))
-#     receiver = db.relationship('User',foreign_keys=[receiver_id],backref=db.backref('received_trades',lazy=True))
-#     sender_skin = db.relationship('Skin',foreign_keys=[sender_skin],backref=db.backref('sent_trades',lazy=True))
-#     receiver_skin = db.relationship('Skin',foreign_keys=[receiver_skin],backref=db.backref('received_trades',lazy=True))
-
-#     def __init__(self,sender_id,receiver_id,sender_skin,receiver_skin):
-#         self.sender_id = sender_id
-#         self.receiver_id = receiver_id
-#         self.sender_skin = sender_skin
-#         self.receiver_skin = receiver_skin
-
-#     def serialize(self):
-#         return{
-#             'id': self.id,
-#             'sender_id' : self.sender_id,
-#             'receiver_id' : self.receiver_id,
-#             'sender_skin' : self.sender_skin,
-#             'receiver_skin' : self.receiver_skin,
-#             'date' : self.date,
-#             'status' : self.status
-#         }
-
-    
-# class Transaction(db.Model):
-#     __tablename__ = 'transactions'
-#     id = db.Column(db.String(36),primary_key=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
-#     buyer_id = db.Column(db.String(36),db.ForeignKey('users.id'),nullable=False)
-#     seller_id = db.Column(db.String(36),db.ForeignKey('users.id'),nullable=False)
-#     skin_id = db.Column(db.String(36),db.ForeignKey('skins.id'),nullable=False)
-#     amount = db.Column(db.Integer,nullable=False)
-#     date = db.Column(db.DateTime,nullable=False,default=datetime.utcnow)
-#     status = db.Column(db.String(20),nullable=False,default='pending')
-
-#     buyer = db.relationship('User',foreign_keys=[buyer_id],backref=db.backref('buy_transactions',lazy=True))
-#     seller = db.relationship('User',foreign_keys=[seller_id],backref=db.backref('sell_transactions',lazy=True))
-#     skin = db.relationship('Skin',backref=db.backref('transactions',lazy=True))
-
-#     def __init__(self,buyer_id,seller_id,skin_id,amount):
-#         self.buyer_id = buyer_id
-#         self.seller_id = seller_id
-#         self.skin_id = skin_id
-#         self.amount = amount
-
-#     def serialize(self):
-#         return{
-#             'id': self.id,
-#             'buyer_id' : self.buyer_id,
-#             'seller_id' : self.seller_id,
-#             'skin_id' : self.skin_id,
-#             'amount' : self.amount,
-#             'date' : self.date,
-#             'status' : self.status
-#         }
 
 
 
@@ -177,6 +87,8 @@ def index():
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(user_id)
+
+
 
 @app.route('/register',methods=['GET'])
 def register():
@@ -218,8 +130,8 @@ def register_user():
 def login():
     return render_template('login0.html')
 
-@app.route('/login-user', methods=["GET","POST"])
-def login_user():
+@app.route('/teoria', methods=["GET","POST"])
+def teoria():
     try:
         e_mail = request.form.get('e_mail')
         password = request.form.get('password')
@@ -228,6 +140,7 @@ def login_user():
         if user is not None:
             if user.password == password:
             # El usuario con el correo electrónico proporcionado se encontró en la base de datos
+                login_user(user)
                 return jsonify({'success': True})
             else:
                 # El usuario con el correo electrónico proporcionado no se encontró en la base de datos
