@@ -107,7 +107,6 @@ def login_user():
         password = request.form.get('password')
         user = User.query.filter_by(e_mail=e_mail).first()
 
-        
         if user is not None:
             if user.password == password:
             # El usuario con el correo electrónico proporcionado se encontró en la base de datos
