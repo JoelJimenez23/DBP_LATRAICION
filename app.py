@@ -49,8 +49,6 @@ class User(db.Model):
         }
 
 
-
-
 #with app.app_context():db.create_all()
 with app.app_context():db.drop_all()
 # Empezamos las rutas:
@@ -62,6 +60,16 @@ def index():
 @app.route('/register',methods=['GET'])
 def register():
     return render_template('register.html')
+
+@app.route('/register-user',methods=['POST'])
+def register_user():
+    try:
+        nickname  = request.form.get('nickname')
+        skins_hashes = request.form.get('skins_hashes')
+        e_mail = request.form.get('e_mail')
+        password = request.form.get('saldo')
+
+
 
 @app.route('/login',methods=['GET'])
 def login():
