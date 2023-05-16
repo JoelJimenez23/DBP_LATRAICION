@@ -67,7 +67,6 @@ class User(UserMixin,db.Model):
     
     def get_id(self):
         return self.id
-
     def serialize(self):
         return{
             'id': self.id,
@@ -131,7 +130,6 @@ def register_user():
     finally:
         db.session.close()
 
-
 @app.route('/prueba',methods=["GET"])
 def prueba():
     return render_template('skin_register_prueba.html')
@@ -157,7 +155,7 @@ def register_skin():
             # inputfile.write(str(uid) + '\n')
 
             filename = f'{current_user.id}.txt'
-            filepath = os.path.join(f"{app.config['UPLOAD_FOLDER']}/{current_user.id}",filename)
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'],current_user.id,filename)
 
             with open(filepath,'a') as file:
                 file.write(str(uid) + '\n')
@@ -192,10 +190,14 @@ def teoria():
         password = request.form.get('password')
         user = User.query.filter_by(e_mail=e_mail).first()
 
-        if user is not None and user.password == password:
+        if user is not None:
+            if user.password == password:
             # El usuario con el correo electrónico proporcionado se encontró en la base de datos
-            login_user(user)
-            return jsonify({'success': True})
+                login_user(user)
+                return jsonify({'success': True})
+            else:
+                # El usuario con el correo electrónico proporcionado no se encontró en la base de datos
+                return jsonify({'success': False,'message':'no se encontro'})
         else:
             return jsonify({'success':False,'message':"User not registered"})
     except Exception as e:
@@ -317,5 +319,3 @@ if __name__ == '__main__':
     app.run(debug=True)
 else:
     print('Importing {}'.format(__name__))
-
-
