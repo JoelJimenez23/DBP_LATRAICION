@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skinloot - Marketplace for Video Games Skins</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/static/css/index.css">
+    <link rel="stylesheet" href="/static/css/index.css"> 
+    <script src="/static/js/index.js"></script>
   </head>
   <body>
     <head>
-      <div class="menu" onclick="redirect(1)"><b>Log In</b></div>
+      <button class="menu" onclick="redirect(1)"><b>Log In</b></button>
     </head>
     <div class="jumbotron">
       <div class="container-fluid text-center">
@@ -45,20 +46,11 @@
     <div>
       <button class="Register_now" onclick="redirect(0)">Register Now</button>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-      function redirect(index){
-        if(index === 0){
-          window.location.href = "http://127.0.0.1:5000/register";
-        }
-        if(index === 1){
-          window.location.href = "http://127.0.0.1:5000/login";
-        }
-      }
-    </script>
   </body>
 </html>
+
+
 
 
 

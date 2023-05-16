@@ -6,7 +6,6 @@ import sys
 import os
 
 app = Flask(__name__)
-
 # ... Para que cada uno trabaje en su maquina: 
 
 # Obtiene el usuario y la contraseña de las variables de entorno
@@ -16,9 +15,8 @@ app = Flask(__name__)
 # Construye la URI de la base de datos
 # db_uri = f
 # Configura la URI en la aplicación Flask
-
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:230204@localhost:5432/skinloot"
-
+# hola
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:546362@localhost:5432/skinloot"
 
 db = SQLAlchemy(app)
 ALLOWED_EXTENSIONS = {'png','jpeg','jpg'}
@@ -53,13 +51,21 @@ class User(db.Model):
 
 
 
-with app.app_context():db.create_all()
-
+#with app.app_context():db.create_all()
+with app.app_context():db.drop_all()
 # Empezamos las rutas:
 
 @app.route('/',methods=['GET'])
 def index():
     return render_template('index.html')
+
+@app.route('/register',methods=['GET'])
+def register():
+    return render_template('register.html')
+
+@app.route('/login',methods=['GET'])
+def login():
+    return render_template('login.html')
 
 
 # Fin de las rutas

@@ -1,0 +1,37 @@
+{% extends "base.html"%}
+
+{%block title%} Register {%endblock%}
+
+{% block body %}
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+    <div class="row">
+        <div class="col-md-5">
+            <div class="logo-container text-center">
+                <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="Logo" class="logo" >
+            </div>
+        </div>
+        <div class="col-md-6">
+            <h1  class = "skinloot" class="text-center">Register</h1>
+            <div class="form-container">
+                <form action="{{ url_for('register') }}" method="POST" class="registration-form">
+                    <div class="form-group">
+                        <label for="nickname">Nickname:</label>
+                        <input type="text" id="nickname" name="nickname" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="e_mail">Email:</label>
+                        <input type="email" id="e_mail" name="e_mail" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="saldo">Password:</label>
+                        <input type="text" id="Password" name="Password" class="form-control" required>
+                    </div>
+                    <input type="submit" value="Submit" class="btn btn-primary" class = "submit">
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

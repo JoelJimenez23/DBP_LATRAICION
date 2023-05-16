@@ -1,0 +1,61 @@
+body {
+    background: url("https://media.giphy.com/media/xTiTnqE811h53uGj3a/giphy.gif") no-repeat 16% center fixed;
+    background-size: auto 100%;
+    background-color: rgb(0, 0, 0);
+    color: rgb(207, 0, 0);
+  }
+  
+.skinloot {
+    font-weight: none;
+    font-size: 100px;
+    font-family: "Times New Roman", Times, serif;
+    color: #FF0000;
+}
+
+.form-container {
+    /*background-color: #000000; /* es el contrno*/
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.registration-form label {
+    display: block;
+    margin-bottom: 10px;    
+    color: rgb(207, 0, 0);  /* los nicks y eso*/
+    font-weight: bold;
+}
+
+.registration-form input[type="text"],
+.registration-form input[type="email"],
+.registration-form input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    background-color: #2c2c2c;
+    color: rgb(0, 0, 0);
+    border: none;
+    border-radius: 4px; /* los inputs*/
+}
+
+.registration-form input[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    background-color: rgb(207, 0, 0);
+    color: #000000; /* el submit*/
+    border: #383838;
+    border-radius: 9px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.registration-form input[type="submit"]:hover {
+    background-color: darkred;
+}
+.logo {     
+    width: 100%;
+    max-width: 1000px; /* Ajusta el tamaño máximo de la imagen según tus preferencias */
+    display: block;
+    margin: 0 auto; /* Centra la imagen horizontalmente */
+    border-radius: 10000px;
+    border: #ff0303;
+}
