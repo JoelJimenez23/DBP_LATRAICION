@@ -21,3 +21,50 @@ app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 
 db = SQLAlchemy(app)
 ALLOWED_EXTENSIONS = {'png','jpeg','jpg'}
+
+# Empezamos los modelos: 
+
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.String(36),primary_key=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
+    nickname = db.Column(db.String(100),unique=False,nullable=False)
+    e_mail = db.Column(db.String(100),primary_key=True,nullable=False,unique=True)
+    password = db.Column(db.String(100),unique=False,nullable=False)
+    created_at = db.Column(db.DateTime(timezone=True), nullable=False, server_default=db.text("now()"))
+
+    def __init__(self,nickname,e_mail,saldo):
+        self.nickname = nickname
+        self.e_mail = e_mail    
+        self.saldo = saldo
+        self.created_at = datetime.utcnow()
+    def serialize(self):
+        return{
+            'id': self.id,
+            'nickname' : self.nickname,
+            'e_mail' : self.e_mail,
+            'password' : self.password,
+            'saldo' : self.saldo,
+            'created_at':self.created_at
+        }
+    
+with app.app_context():db.create_all()
+
+# Empezamos las rutas:
+
+@app.route('/',methods=['GET'])
+def index():
+    return render_template('index.html')
+
+
+# Fin de las rutas
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# Corremos la aplicación: 
+
+if __name__ == '__main__':
+    app.run(debug=True)
+else:
+    print('Importing {}'.format(__name__))
