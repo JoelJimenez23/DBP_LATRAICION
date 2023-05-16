@@ -44,11 +44,10 @@ class User(db.Model):
         return{
             'id': self.id,
             'nickname' : self.nickname,
-            'skin_hashes': self.skins_hashes,
+            'skins_hashes': self.skins_hashes,
             'e_mail' : self.e_mail,
             'password' : self.password,
             'saldo' : self.saldo,
-            'created_at':self.created_at
         }
 
 
@@ -78,7 +77,6 @@ def register_user():
 
         cwd = os.getcwd()
 
-
         user_dir = os.path.join(app.config['UPLOAD_FOLDER'],user.id)
         os.makedirs(user_dir,exist_ok=True)
         upload_folder = os.path.join(cwd,user_dir)
@@ -98,10 +96,29 @@ def register_user():
     finally:
         db.session.close()
 
-
 @app.route('/login',methods=['GET'])
 def login():
     return render_template('login.html')
+
+@app.route('/login-user', methods=["POST"])
+def login_user():
+    try:
+        e_mail = request.form.get('e_mail')
+        password = request.form.get('password')
+        user = User.query.filter_by(e_mail=e_mail).first()
+
+        
+        if user is not None:
+            if user.password == password:
+            # El usuario con el correo electrónico proporcionado se encontró en la base de datos
+                return jsonify({'success': True})
+            else:
+                # El usuario con el correo electrónico proporcionado no se encontró en la base de datos
+                return jsonify({'success': False,'message':'no se encontro'})
+    except Exception as e:
+        print(e)
+        return jsonify({'success': False})
+    
 
 @app.route('/market',methods=['GET'])
 def market():
