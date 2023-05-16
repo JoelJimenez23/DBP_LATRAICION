@@ -11,7 +11,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:230204@localhost:5432/skinloot"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:546362@localhost:5432/skinloot"
 app.config['UPLOAD_FOLDER'] = 'static/usuarios'
 app.secret_key = 'clave'
 db = SQLAlchemy(app)
@@ -76,8 +76,7 @@ class Skin(db.Model):
 
 
 #with app.app_context():db.create_all()
-with app.app_context():
-    db.create_all()
+with app.app_context():db.create_all()
 # Empezamos las rutas:
 
 @app.route('/',methods=['GET'])
@@ -163,7 +162,7 @@ def teoria():
 @app.route('/market',methods=['GET'])
 @login_required
 def market():
-    return render_template('market0.html')
+    return render_template('market2.html')
 
 
 

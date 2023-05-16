@@ -20,8 +20,15 @@
             <label for="password">Password:</label>
             <input type="text" id="password" name="password" class="form-control" required>
         </div>
-        <input type="submit" value="Submit" class="btn btn-primary" class = "submit">
+        <input type="submit" value="Submit" class="btn btn-primary" class = "submit" onclick="redirect(0)">
     </form>
+    <script>
+        function redirect(index){
+        if(index === 0){
+          window.location.href = "http://127.0.0.1:5000/market";
+        }
+    }
+    </script>
 </div>
 {% endblock %}
 
