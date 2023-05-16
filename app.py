@@ -10,14 +10,14 @@ app = Flask(__name__)
 # ... Para que cada uno trabaje en su maquina: 
 
 # Obtiene el usuario y la contraseña de las variables de entorno
-db_user = os.environ.get('DB_USER')
-db_password = os.environ.get('DB_PASSWORD')
+# db_user = os.environ.get('DB_USER')
+# db_password = os.environ.get('DB_PASSWORD')
 
 # Construye la URI de la base de datos
-db_uri = f"postgresql://{db_user}:{db_password}@localhost:5432/skinloot"
-
+# db_uri = f
 # Configura la URI en la aplicación Flask
-app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:230204@localhost:5432/skinloot"
+
 
 db = SQLAlchemy(app)
 ALLOWED_EXTENSIONS = {'png','jpeg','jpg'}
