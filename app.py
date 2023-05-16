@@ -11,7 +11,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:546362@localhost:5432/skinloot"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:230204@localhost:5432/skinloot"
 app.config['UPLOAD_FOLDER'] = 'static/usuarios'
 app.secret_key = 'clave'
 db = SQLAlchemy(app)
@@ -53,24 +53,26 @@ class Skin(db.Model):
     id = db.Column(db.String(36),primary_key=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
     name = db.Column(db.String(100),unique=False,nullable=False)
     champion_name = db.Column(db.String(100),unique=False,nullable=False)
-    image = db.Column(db.String(200),nullable=True)
+    rarity = db.Column(db.String(100),unique=False,nullable=False)
+    image = db.Column(db.String(500),nullable=True)
     user_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
 
 
-    def __init__(self,name,description,price,rarity,):
+    def __init__(self,name,champion_name,rarity,user_id):
         self.name = name
-        self.description = description
-        self.price = price
+        self.champion_name = champion_name
+        self.rarity = rarity
+        self.user_id = user_id
     
 
     def serialize(self):
         return{
             'id': self.id,
             'name' : self.name,
-            'description': self.description,
-            'price' : self.price,
+            'champion_name': self.champion_name,
             'rarity' : self.rarity,
-            'image_url' : self.image_url
+            'image' : self.image,
+            'user_id' : self.user_id
         }
 
 
@@ -121,16 +123,48 @@ def register_user():
         print(e)
         print(sys.exc_info())
         db.session.rollback()
-        return jsonify({'success':False,'message':'Error al crear el empleado'})
+        return jsonify({'success':False,'message':'Error al crear el usuario'})
     finally:
         db.session.close()
 
+@app.route('/prueba',methods=["GET"])
+def prueba():
+    return render_template('skin_register_prueba.html')
+
 @app.route('/register-skin',methods=['POST'])
+@login_required
 def register_skin():
     try:
-        name = request.form.get('name')
-        champion_name = request.form.get('champion_name')
-        user_id = request.form.get('name')
+        if current_user.is_authenticated:
+            name = request.form.get('name')
+            champion_name = request.form.get('champion_name')
+            rarity = request.form.get('rarity')
+            user_id = current_user.id
+            skin = Skin(name,champion_name,rarity,user_id)
+            
+            db.session.add(skin)
+            db.session.commit()
+
+            uid = skin.id
+            direc = open(f"{app.config['UPLOAD_FOLDER']}/{current_user.id}",f"{current_user.id}.txt")
+            inputfile = open(direc,"a")
+            inputfile.write(str(uid) + '\n')
+            inputfile.close()
+            db.session.commit()
+            return jsonify({'skin_id':skin.id,'user_id':current_user.id,"message":"Skin agregada"})
+        else:
+            return jsonify({"message" : "current user not authorized"})
+    except Exception as e:
+        print(e)
+        print(sys.exc_info())
+        db.session.rollback()
+        return jsonify({'success':False,'message':'Error al crear skin'})
+    finally:
+        db.session.close()
+
+
+
+        
 
 
 
