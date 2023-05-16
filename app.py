@@ -9,7 +9,6 @@ import os
 app = Flask(__name__)
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = '/login'
 # ... Para que cada uno trabaje en su maquina: 
 
 # Obtiene el usuario y la contraseña de las variables de entorno
