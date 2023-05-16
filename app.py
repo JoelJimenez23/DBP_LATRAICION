@@ -16,9 +16,8 @@ app = Flask(__name__)
 # db_uri = f
 # Configura la URI en la aplicación Flask
 # hola
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:230204@localhost:5432/skinloot"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:546362@localhost:5432/skinloot"
 app.config['UPLOAD_FOLDER'] = 'static/usuarios'
-
 
 db = SQLAlchemy(app)
 ALLOWED_EXTENSIONS = {'png','jpeg','jpg'}
@@ -58,11 +57,11 @@ with app.app_context():
 
 @app.route('/',methods=['GET'])
 def index():
-    return render_template('index.html')
+    return render_template('index0.html')
 
 @app.route('/register',methods=['GET'])
 def register():
-    return render_template('register.html')
+    return render_template('register0.html')
 
 @app.route('/register-user',methods=['POST'])
 def register_user():
@@ -98,7 +97,7 @@ def register_user():
 
 @app.route('/login',methods=['GET'])
 def login():
-    return render_template('login.html')
+    return render_template('login0.html')
 
 @app.route('/login-user', methods=["POST"])
 def login_user():
@@ -121,7 +120,7 @@ def login_user():
 
 @app.route('/market',methods=['GET'])
 def market():
-    return render_template('market.html')
+    return render_template('market0.html')
 # Fin de las rutas
 
 def allowed_file(filename):
