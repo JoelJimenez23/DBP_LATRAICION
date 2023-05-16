@@ -49,6 +49,83 @@ class User(db.Model):
             'password' : self.password,
             'saldo' : self.saldo,
         }
+    
+class Skin(db.Model):
+    __tablename__ = 'skins'
+    id = db.Column(db.String(36),primary_key=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
+    name = db.Column(db.String(100),unique=False,nullable=False)
+    rarity = db.Column(db.String(20),unique=False,nullable=False)
+    image_url = db.Column(db.String(200),unique=False,nullable=True)
+
+    def __init__(self,name,description,price,rarity,image_url):
+        self.name = name
+        self.description = description
+        self.price = price
+        self.rarity = rarity
+        self.image_url = image_url
+
+    def serialize(self):
+        return{
+            'id': self.id,
+            'name' : self.name,
+            'description': self.description,
+            'price' : self.price,
+            'rarity' : self.rarity,
+            'image_url' : self.image_url
+        }
+
+class PostSkin(db.Model):
+    __tablename__ = 'post_skins'
+    id = db.Column(db.String(36),primary_key=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
+    skin_id = db.Column(db.String(36),db.ForeignKey('skins.id'),nullable=False)
+    owner_id = db.Column(db.String(36),db.ForeignKey('users.id'),nullable=False)
+    price = db.Column(db.Integer,nullable=False)
+
+    skin = db.relationship('Skin',backref=db.backref('post_skins',lazy=True))
+    owner = db.relationship('User',backref=db.backref('post_skins',lazy=True))
+
+    def __init__(self,skin_id,owner_id):
+        self.skin_id = skin_id
+        self.owner_id = owner_id
+
+    def serialize(self):
+        return{
+            'id': self.id,
+            'skin_id' : self.skin_id,
+            'owner_id' : self.owner_id
+        }
+    
+class Transaction(db.Model):
+    __tablename__ = 'transactions'
+    id = db.Column(db.String(36),primary_key=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
+    buyer_id = db.Column(db.String(36),db.ForeignKey('users.id'),nullable=False)
+    seller_id = db.Column(db.String(36),db.ForeignKey('users.id'),nullable=False)
+    skin_id = db.Column(db.String(36),db.ForeignKey('skins.id'),nullable=False)
+    amount = db.Column(db.Integer,nullable=False)
+    date = db.Column(db.DateTime,nullable=False,default=datetime.utcnow)
+    status = db.Column(db.String(20),nullable=False,default='pending')
+
+    buyer = db.relationship('User',foreign_keys=[buyer_id],backref=db.backref('buy_transactions',lazy=True))
+    seller = db.relationship('User',foreign_keys=[seller_id],backref=db.backref('sell_transactions',lazy=True))
+    skin = db.relationship('Skin',backref=db.backref('transactions',lazy=True))
+
+    def __init__(self,buyer_id,seller_id,skin_id,amount):
+        self.buyer_id = buyer_id
+        self.seller_id = seller_id
+        self.skin_id = skin_id
+        self.amount = amount
+
+    def serialize(self):
+        return{
+            'id': self.id,
+            'buyer_id' : self.buyer_id,
+            'seller_id' : self.seller_id,
+            'skin_id' : self.skin_id,
+            'amount' : self.amount,
+            'date' : self.date,
+            'status' : self.status
+        }
+
 
 
 #with app.app_context():db.create_all()
@@ -122,6 +199,68 @@ def login_user():
 @app.route('/market',methods=['GET'])
 def market():
     return render_template('market.html')
+
+@app.route('/buy-skin/<post_skin_id>',methods=['POST'])
+def buy_skin(post_skin_id):
+    try:
+        # Get the post_skin record by id
+        post_skin = PostSkin.query.get(post_skin_id)
+        if not post_skin:
+            return jsonify({'success':False,'message':'Post skin not found'})
+
+        # Get the buyer and seller ids from the request
+        buyer_id = request.form.get('buyer_id')
+        seller_id = post_skin.owner_id
+
+        # Get the buyer and seller objects from the database
+        buyer = User.query.get(buyer_id)
+        seller = User.query.get(seller_id)
+
+        if not buyer or not seller:
+            return jsonify({'success':False,'message':'Buyer or seller not found'})
+
+        # Get the skin id and price from the post_skin record
+        skin_id = post_skin.skin_id
+        skin = Skin.query.get(skin_id)
+        if not skin:
+            return jsonify({'success':False,'message':'Skin not found'})
+
+        price = skin.price
+
+        # Check if the buyer has enough balance to pay for the skin
+        if buyer.saldo < price:
+            return jsonify({'success':False,'message':'Insufficient balance'})
+
+        # Create a new transaction record with the buyer_id, seller_id, skin_id and amount
+        transaction = Transaction(buyer_id,seller_id,skin_id,price)
+        db.session.add(transaction)
+
+        # Deduct the amount from the buyer's saldo and add it to the seller's saldo
+        buyer.saldo -= price
+        seller.saldo += price
+
+        # Update the owner_id of the post_skin record to the buyer's id
+        post_skin.owner_id = buyer.id
+
+        # Delete the post_skin record from the table
+        db.session.delete(post_skin)
+
+        # Commit the changes to the database
+        db.session.commit()
+
+        # Return a success message and complete the transaction
+        transaction.status = 'completed'
+        db.session.commit()
+        
+        return jsonify({'success':True,'message':'Transaction completed successfully'})
+    except Exception as e:
+        print(e)
+        print(sys.exc_info())
+        db.session.rollback()
+        return jsonify({'success':False,'message':'Error in completing transaction'})
+    finally:
+        db.session.close()
+
 # Fin de las rutas
 
 def allowed_file(filename):
