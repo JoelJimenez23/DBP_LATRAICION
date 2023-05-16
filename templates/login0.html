@@ -5,7 +5,7 @@
 {% block body %}
 <h1  class = "skinloot" class="text-center">Login</h1>
 <div class="form-container">
-    <form action="/teoria" method="POST" class="registration-form">
+    <form action="/teoria" method="POST" class="registration-form" id=login_acces>
         <div class="form-group">
             <label for="e_mail">Email:</label>
             <input type="email" id="e_mail" name="e_mail" class="form-control" required>
@@ -15,16 +15,9 @@
             <label for="password">Password:</label>
             <input type="text" id="password" name="password" class="form-control" required>
         </div>
-        <input type="submit" value="Submit" class="btn btn-primary" class = "submit" onclick="redirect(0)">
+        <input type="submit" value="Submit" class="btn btn-primary" class = "submit" >
     </form>
-    <script>
-        function redirect(index){
-        if(index === 0){
-          window.location.href = "http://127.0.0.1:5000/market";
-        }
-    }
-    </script>
 </div>
 {% endblock %}
 
-<!-- {{ url_for('login') }} -->
+// <!-- {{ url_for('login') }} -->

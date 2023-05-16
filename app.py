@@ -18,39 +18,11 @@ db = SQLAlchemy(app)
 ALLOWED_EXTENSIONS = {'png','jpeg','jpg'}
 
 # Empezamos los modelos: 
+# e_mail = db.Column(db.String(100),primary_key=True,nullable=False,unique=True)
 
-class User(UserMixin,db.Model):
-    __tablename__ = 'users'
-    id = db.Column(db.String(36),primary_key=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
-    nickname = db.Column(db.String(100),unique=False,nullable=False)
-    skins_hashes = db.Column(db.String(100),unique=False,nullable=True)
-    # e_mail = db.Column(db.String(100),primary_key=True,nullable=False,unique=True)
-    e_mail = db.Column(db.String(100),nullable=False,unique=True)
-    password = db.Column(db.String(100),unique=False,nullable=False)
-    saldo = db.Column(db.Integer,nullable=True,server_default='0')
-    skins = db.relationship('Skin',backref='skin',lazy=True)
-
-
-    def __init__(self,nickname,e_mail,password):
-        self.nickname = nickname
-        self.e_mail = e_mail    
-        self.password = password
-    
-    def get_id(self):
-        return self.id
-    def serialize(self):
-        return{
-            'id': self.id,
-            'nickname' : self.nickname,
-            'skins_hashes': self.skins_hashes,
-            'e_mail' : self.e_mail,
-            'password' : self.password,
-            'saldo' : self.saldo,
-        }
-    
 class Skin(db.Model):
     __tablename__ = 'skins'
-    id = db.Column(db.String(36),primary_key=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
+    id = db.Column(db.String(36),primary_key=True,unique=True,default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
     name = db.Column(db.String(100),unique=False,nullable=False)
     champion_name = db.Column(db.String(100),unique=False,nullable=False)
     rarity = db.Column(db.String(100),unique=False,nullable=False)
@@ -74,6 +46,37 @@ class Skin(db.Model):
             'image' : self.image,
             'user_id' : self.user_id
         }
+
+
+
+class User(UserMixin,db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.String(36),primary_key=True,default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
+    nickname = db.Column(db.String(100),unique=False,nullable=False)
+    skins_hashes = db.Column(db.String(100),unique=False,nullable=True)
+    e_mail = db.Column(db.String(100),unique=True,nullable=False)
+    password = db.Column(db.String(100),unique=False,nullable=False)
+    saldo = db.Column(db.Integer,nullable=True,server_default='0')
+    skins = db.relationship('Skin',backref='user',lazy=True)
+
+
+    def __init__(self,nickname,e_mail,password):
+        self.nickname = nickname
+        self.e_mail = e_mail    
+        self.password = password
+    
+    def get_id(self):
+        return self.id
+    def serialize(self):
+        return{
+            'id': self.id,
+            'nickname' : self.nickname,
+            'skins_hashes': self.skins_hashes,
+            'e_mail' : self.e_mail,
+            'password' : self.password,
+            'saldo' : self.saldo,
+        }
+    
 
 
 
@@ -140,16 +143,23 @@ def register_skin():
             champion_name = request.form.get('champion_name')
             rarity = request.form.get('rarity')
             user_id = current_user.id
+
             skin = Skin(name,champion_name,rarity,user_id)
             
             db.session.add(skin)
             db.session.commit()
 
             uid = skin.id
-            direc = open(f"{app.config['UPLOAD_FOLDER']}/{current_user.id}",f"{current_user.id}.txt")
-            inputfile = open(direc,"a")
-            inputfile.write(str(uid) + '\n')
-            inputfile.close()
+            # direc = open(f"{app.config['UPLOAD_FOLDER']}/{current_user.id}",f"{current_user.id}.txt")
+            # inputfile = open(direc,"a")
+            # inputfile.write(str(uid) + '\n')
+
+            filename = f'{current_user.id}.txt'
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'],current_user.id,filename)
+
+            with open(filepath,'a') as file:
+                file.write(str(uid) + '\n')
+
             db.session.commit()
             return jsonify({'skin_id':skin.id,'user_id':current_user.id,"message":"Skin agregada"})
         else:
@@ -188,6 +198,8 @@ def teoria():
             else:
                 # El usuario con el correo electrónico proporcionado no se encontró en la base de datos
                 return jsonify({'success': False,'message':'no se encontro'})
+        else:
+            return jsonify({'success':False,'message':"User not registered"})
     except Exception as e:
         print(e)
         return jsonify({'success': False})
