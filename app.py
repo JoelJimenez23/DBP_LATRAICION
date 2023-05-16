@@ -79,7 +79,7 @@ class PostSkin(db.Model):
     id = db.Column(db.String(36),primary_key=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
     skin_id = db.Column(db.String(36),db.ForeignKey('skins.id'),nullable=False)
     owner_id = db.Column(db.String(36),db.ForeignKey('users.id'),nullable=False)
-    price = db.Column(db.Integer,nullable=False)
+    price = db.Column(db.Integer,nullable=True)
 
     skin = db.relationship('Skin',backref=db.backref('post_skins',lazy=True))
     owner = db.relationship('User',backref=db.backref('post_skins',lazy=True))
@@ -94,6 +94,39 @@ class PostSkin(db.Model):
             'skin_id' : self.skin_id,
             'owner_id' : self.owner_id
         }
+    
+class Trade(db.Model):
+    __tablename__ = 'trades'
+    id = db.Column(db.String(36),primary_key=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
+    sender_id = db.Column(db.String(36),db.ForeignKey('users.id'),nullable=False)
+    receiver_id = db.Column(db.String(36),db.ForeignKey('users.id'),nullable=False)
+    sender_skin = db.Column(db.String(36),db.ForeignKey('skins.id'),nullable=False)
+    receiver_skin = db.Column(db.String(36),db.ForeignKey('skins.id'),nullable=False)
+    date = db.Column(db.DateTime,nullable=False,default=datetime.utcnow)
+    status = db.Column(db.String(20),nullable=False,default='pending')
+
+    sender = db.relationship('User',foreign_keys=[sender_id],backref=db.backref('sent_trades',lazy=True))
+    receiver = db.relationship('User',foreign_keys=[receiver_id],backref=db.backref('received_trades',lazy=True))
+    sender_skin = db.relationship('Skin',foreign_keys=[sender_skin],backref=db.backref('sent_trades',lazy=True))
+    receiver_skin = db.relationship('Skin',foreign_keys=[receiver_skin],backref=db.backref('received_trades',lazy=True))
+
+    def __init__(self,sender_id,receiver_id,sender_skin,receiver_skin):
+        self.sender_id = sender_id
+        self.receiver_id = receiver_id
+        self.sender_skin = sender_skin
+        self.receiver_skin = receiver_skin
+
+    def serialize(self):
+        return{
+            'id': self.id,
+            'sender_id' : self.sender_id,
+            'receiver_id' : self.receiver_id,
+            'sender_skin' : self.sender_skin,
+            'receiver_skin' : self.receiver_skin,
+            'date' : self.date,
+            'status' : self.status
+        }
+
     
 class Transaction(db.Model):
     __tablename__ = 'transactions'
