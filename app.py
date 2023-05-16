@@ -1,3 +1,1 @@
-from flask import flask
-
-print("hola")
+from flask import Flask,render_template,request,jsonify
