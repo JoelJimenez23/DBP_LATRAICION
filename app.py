@@ -30,7 +30,7 @@ class User(db.Model):
     nickname = db.Column(db.String(100),unique=False,nullable=False)
     e_mail = db.Column(db.String(100),primary_key=True,nullable=False,unique=True)
     password = db.Column(db.String(100),unique=False,nullable=False)
-    created_at = db.Column(db.DateTime(timezone=True), nullable=False, server_default=db.text("now()"))
+    saldo = db.Column(db.Integer,nullable=False)
 
     def __init__(self,nickname,e_mail,saldo):
         self.nickname = nickname
@@ -46,7 +46,10 @@ class User(db.Model):
             'saldo' : self.saldo,
             'created_at':self.created_at
         }
-    
+
+
+
+
 with app.app_context():db.create_all()
 
 # Empezamos las rutas:

@@ -1,0 +1,35 @@
+.jumbotron {
+    background: url("https://media.giphy.com/media/UtEQ8viTEfCdiAOW4Q/giphy.gif") no-repeat center center fixed;
+    background-size: cover;
+    padding-top: 10%;
+    padding-bottom: 10%;
+}
+#how-it-works {
+    background-color: #000000;
+    color: #dc3545;
+    padding-top: 50px;
+    padding-bottom: 50px;
+}
+#how-it-works h2 {
+    font-size: 3rem;
+    font-weight: bold;
+}
+body{
+    background-color: black;
+}
+.Register_now{
+    background-color: #dc3545;
+    color: black;
+    margin-left: 47%;
+    border: none;
+    padding: 10px 10px;
+}
+.menu{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: black;
+    color: #dc3545;
+    padding: 10px;
+    margin-left: 95%;
+}
