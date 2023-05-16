@@ -76,7 +76,7 @@ class User(UserMixin,db.Model):
             'e_mail' : self.e_mail,
             'password' : self.password,
             'saldo' : self.saldo,
-            'image' : self.image;
+            'image' : self.image,
         }
     
 
