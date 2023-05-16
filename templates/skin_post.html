@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <title>Product Page</title>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <!-- Bootstrap CSS -->
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.2/css/bootstrap.min.css">
+ <!-- Google Fonts -->
+ <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:400,700|Montserrat:400,700|Lato:400,700&display=swap" rel="stylesheet">
+ <!-- Custom CSS -->
+ <style>
+    html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+ body {
+ background: linear-gradient(to bottom, #2e0909, #240606, #170000);
+ color: #ffffff;
+ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+ position: relative;
+ }
+ body::before {
+ content: "";
+ position: absolute;
+ top: 0;
+ left: 0;
+ right: 0;
+ bottom: 0;
+ z-index: -1;
+ background-image: inherit;
+ filter: blur(10px);
+ }
+ .container {
+ margin-top: 30px;
+ margin-bottom: 30px;
+ }
+ .skin-box {
+ background-color: rgba(255, 255, 255, 0.75);
+ border-radius: 10px;
+ border: 1px solid rgba(209, 213, 219, 0.3);
+ margin-bottom: 50px;
+ padding: 20px;
+ text-align: center;
+ backdrop-filter: blur(16px) saturate(180%);
+ -webkit-backdrop-filter: blur(16px) saturate(180%);
+ }
+ 
+ .skin-box img {
+ max-width: 100%;
+ height: 200px;
+ object-fit: contain;
+ }
+ .skin-box h3 {
+ font-size: 24px;
+ margin-top: 20px;
+ margin-bottom: 10px;
+ color: rgb(255, 251, 251);
+ }
+ .skin-box p {
+ font-size: 18px;
+ margin-bottom: 20px;
+ color: rgb(101, 91, 91);
+ }
+ .buy-button {
+ background-color: rgba(30, 24, 24, 0.75);
+ border: none;
+ color: #ffffff;
+ padding: 10px 20px;
+ border-radius: 5px;
+ font-size: 18px;
+ cursor: pointer;
+ transition: background-color 0.3s;
+ box-shadow: inset 0 0 10px #330f0f;
+ }
+ .buy-button:hover {
+ background-color: #330f0f;
+ }
+ 
+ .custom-input-group {
+ background-color: #333333;
+ border-color: #333333;
+ color: rgb(101, 91, 91);
+ }
+ 
+ .product-name {
+ font-family:'Roboto Slab', serif;
+ font-size:36px;
+ font-weight:bold;
+ color:#333333;
+ margin-bottom:20px;
+ }
+ 
+ .product-game {
+ font-family:'Montserrat', sans-serif;
+ font-size:18px;
+ font-weight:normal;
+ color:#666666;
+ margin-bottom:10px;
+ }
+ 
+ .product-rarity {
+ font-family:'Montserrat', sans-serif;
+ font-size:18px;
+ font-weight:normal;
+ color:#666666;
+ margin-bottom:10px;
+ }
+ 
+ .product-description {
+ font-family:'Lato', sans-serif;
+ font-size:16px;
+ font-weight:normal;
+ color:#999999;
+ }
+ 
+ .product-price {
+font-family:'Lato', sans-serif;
+font-size:36px;
+font-weight:bold;
+color:#333333;
+margin-bottom:20px;
+}
+.product-image {
+max-width: 100%; /* Changed max-width to width */
+height: auto; /* Changed height to auto */
+object-fit: contain;
+}
+
+.placeholder {
+  color: #333333;
+}
+
+.seller-name {
+  font-family: 'Lato', sans-serif;
+  font-size: 18px;
+  font-weight: normal;
+  color: #999999;
+  margin-bottom: 20px;
+}
+
+
+</style>
+
+</head>
+<body>
+ <div class="container">
+ <div class="row">
+ <div class="col-md-6 order-md-2">
+ <img src="skin1.png" alt="Skin 7" class="product-image">
+ <p class="seller-name">Seller: <span class="placeholder">John Doe</span></p>
+ </div>
+ <div class="col-md-6 order-md-1">
+ <h1 class="product-name"><span class="placeholder">Skin Name</span></h1>
+ <p class="product-game">Game: <span class="placeholder">Game Name</span></p>
+ <p class="product-rarity">Rarity: <span class="placeholder">Rarity Level</span></p>
+ <p class="product-description"><span class="placeholder">This is a product description that will make you want to buy this skin.</span></p>
+ <p class="product-price"><span class="placeholder">$40</span></p>
+ <button class="buy-button">Buy Now</button>
+ </div>
+ </div>
+ </div>
+ <!-- Bootstrap JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.2/js/bootstrap.min.js"></script>
+
+</body>
+
+</html>
+
