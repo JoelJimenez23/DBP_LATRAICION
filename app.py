@@ -1,12 +1,15 @@
 from flask import Flask,render_template,jsonify,request
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import login_user,current_user
+from flask_login import login_user,login_required,current_user,LoginManager
 import uuid
 from datetime import datetime
 import sys
 import os
 
 app = Flask(__name__)
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = '/login'
 # ... Para que cada uno trabaje en su maquina: 
 
 # Obtiene el usuario y la contraseña de las variables de entorno
@@ -221,6 +224,7 @@ def login_user():
         if user is not None:
             if user.password == password:
             # El usuario con el correo electrónico proporcionado se encontró en la base de datos
+                login_user(user)
                 return jsonify({'success': True})
             else:
                 # El usuario con el correo electrónico proporcionado no se encontró en la base de datos
@@ -231,6 +235,7 @@ def login_user():
     
 
 @app.route('/market',methods=['GET'])
+@login_required
 def market():
     return render_template('market0.html')
 
