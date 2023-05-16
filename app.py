@@ -27,15 +27,16 @@ class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.String(36),primary_key=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
     nickname = db.Column(db.String(100),unique=False,nullable=False)
-    skins_hashes = db.Column(db.String(100),nullable=True)
+    skins_hashes = db.Column(db.String(100),unique=False,nullable=True)
     e_mail = db.Column(db.String(100),primary_key=True,nullable=False,unique=True)
     password = db.Column(db.String(100),unique=False,nullable=False)
     saldo = db.Column(db.Integer,nullable=True)
 
-    def __init__(self,nickname,e_mail,pasword):
+    def __init__(self,nickname,e_mail,saldo):
         self.nickname = nickname
         self.e_mail = e_mail    
-        self.password = pasword
+        self.saldo = saldo
+        self.created_at = datetime.utcnow()
 
     def serialize(self):
         return{
@@ -44,6 +45,7 @@ class User(db.Model):
             'e_mail' : self.e_mail,
             'password' : self.password,
             'saldo' : self.saldo,
+            'created_at':self.created_at
         }
 
 
@@ -61,20 +63,19 @@ def register():
 
 @app.route('/register-user',methods=['POST'])
 def register_user():
-    try:
+    """try:
         nickname  = request.form.get('nickname')
         skins_hashes = request.form.get('skins_hashes')
         e_mail = request.form.get('e_mail')
-        password = request.form.get('saldo')
-
-    except Exception as e:
-
-
+        password = request.form.get('saldo')"""
 
 @app.route('/login',methods=['GET'])
 def login():
     return render_template('login.html')
 
+@app.route('/market',methods=['GET'])
+def market():
+    return render_template('market.html')
 # Fin de las rutas
 
 def allowed_file(filename):
