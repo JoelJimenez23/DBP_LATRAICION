@@ -126,16 +126,6 @@ def register_user():
     finally:
         db.session.close()
 
-@app.route('/register-skin',methods=['POST'])
-def register_skin():
-    try:
-        name = request.form.get('name')
-        champion_name = request.form.get('champion_name')
-        user_id = request.form.get('name')
-
-
-
-
 @app.route('/login',methods=['GET'])
 def login():
     return render_template('login0.html')
@@ -166,8 +156,6 @@ def market():
     return render_template('market0.html')
 
 
-
-
 @app.route('/show-skins',methods=['GET'])
 def showSkins():
     try:
@@ -177,21 +165,18 @@ def showSkins():
     except Exception as e:
         return jsonify({"success":False})
 
+@app.route('/gaa',methods=["GET"])
+def gaa():
+    return render_template('try_saldo.html')
 
-@app.route('/change-saldo/<dato>',methods=['GET'])
+@app.route('/change-saldo/<dato>',methods=['POST'])
 @login_required
 def change_saldo(dato):
     if current_user.is_authenticated:
-        if current_user.saldo != None:
-            current_user.saldo += int(dato)
-            db.session.commit()
-            return jsonify({'success':True})
-        else:
-            current_user.saldo = int(dato)
-            db.session.commit()
-            return jsonify({'success':True})
+        current_user.saldo += dato
+        return jsonify({'success':True})
     else:
-        return jsonify({'success':False,'message':'User not authenticated'})
+        return jsonify({'success':False})
 
 @app.route('/show-current',methods=['GET'])
 @login_required
