@@ -11,7 +11,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:1234@localhost:5432/skinloot"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:230204@localhost:5432/skinloot"
 app.config['UPLOAD_FOLDER'] = 'static/usuarios'
 app.secret_key = 'clave'
 db = SQLAlchemy(app)
@@ -57,6 +57,7 @@ class User(UserMixin,db.Model):
     e_mail = db.Column(db.String(100),unique=True,nullable=False)
     password = db.Column(db.String(100),unique=False,nullable=False)
     saldo = db.Column(db.Integer,nullable=True,server_default='0')
+    image = db.Column(db.String(500),nullable=True)
     skins = db.relationship('Skin',backref='user',lazy=True)
 
 
@@ -76,6 +77,7 @@ class User(UserMixin,db.Model):
             'e_mail' : self.e_mail,
             'password' : self.password,
             'saldo' : self.saldo,
+            'image' : self.image,
         }
     
 
@@ -122,6 +124,10 @@ def register_user():
         user.skins_hashes = f'{user.id}.txt'
 
         db.session.commit()
+        image_dir = os.path.join('static/images/persona.png')
+        user.image = image_dir
+        db.session.commit()
+
         return jsonify({'id':user.id,'succes':True,'message':'User created successfully!'})
     except Exception as e:
         print(e)
@@ -163,6 +169,7 @@ def register_skin():
                 file.write(str(uid) + '\n')
 
             db.session.commit()
+            
             return jsonify({'skin_id':skin.id,'user_id':current_user.id,"message":"Skin agregada"})
         else:
             return jsonify({"message" : "current user not authorized"})
@@ -231,23 +238,25 @@ def change_saldo():
                 current_user.saldo += int(dato)
             else:
                 current_user.saldo = int(dato)
+            db.session.commit()
             return jsonify({'success':True})
         else:
-            return jsonify({'success':False,'message':"user ot authenticated"})
+            return jsonify({'success':False,'message':"user not authenticated"})
     except Exception as e:
         return jsonify({'succes':False,"message":'error desconocido'})
 
     
 @app.route('/change-nickname',methods=['POST'])
 @login_required
-def change_saldo():
+def change_nickname():
     try:
         dato = request.form.get('new_nickname')
         if current_user.is_authenticated:
             current_user.nickname = dato
+            db.session.commit()
             return jsonify({'success':True})
         else:
-            return jsonify({'success':False,'message':"user ot authenticated"})
+            return jsonify({'success':False,'message':"user not authenticated"})
     except Exception as e:
         return jsonify({'succes':False,"message":'error desconocido'})
 
@@ -255,14 +264,15 @@ def change_saldo():
 
 @app.route('/change-e_mail',methods=['POST'])
 @login_required
-def change_saldo():
+def change_e_mail():
     try:
         dato = request.form.get('new_e_mail')
         if current_user.is_authenticated:
             current_user.nickname = dato
+            db.session.commit()
             return jsonify({'success':True})
         else:
-            return jsonify({'success':False,'message':"user ot authenticated"})
+            return jsonify({'success':False,'message':"user not authenticated"})
     except Exception as e:
         return jsonify({'succes':False,"message":'error desconocido'})
 
@@ -270,32 +280,55 @@ def change_saldo():
 
 @app.route('/change-password',methods=['POST'])
 @login_required
-def change_saldo():
+def change_password():
     try:
         dato = request.form.get('new_password')
         if current_user.is_authenticated:
             current_user.nickname = dato
+            db.session.commit()
             return jsonify({'success':True})
         else:
-            return jsonify({'success':False,'message':"user ot authenticated"})
+            return jsonify({'success':False,'message':"user not authenticated"})
     except Exception as e:
         return jsonify({'succes':False,"message":'error desconocido'})
 
 
 
+@app.route('/change-image',methods=['POST'])
+@login_required
+def change_image():
+    try:
+
+        if current_user.is_authenticated:
+            if 'image' not in request.files:
+                return  jsonify({'success':False,'message':'No image provided by the user'}),400
+        
+            file = request.files['image']
+
+            if file.filename == '':
+                return jsonify({'success':False,'message':'No image selected'}), 400
+
+            if not allowed_file(file.filename):
+                return jsonify({'success':False, 'message':'Image format not allowed'}), 400
+            
+            dato = request.form.get('new_password')
+            cwd = os.getcwd()
+
+            user_dir = os.path.join(app.config['UPLOAD_FOLDER'], current_user.id)
+            os.makedirs(user_dir,exist_ok=True)
+            upload_folder = os.path.join(cwd,user_dir)
+            file.save(os.path.join(upload_folder,file.filename))
+            current_user.image = file.filename
+            db.session.commit()
+
+            return jsonify({'success':True})
+        else:
+            return jsonify({'success':False,'message':"user not authenticated"})
+    except Exception as e:
+        return jsonify({'succes':False,"message":'error desconocido'})
 
 
-# if current_user.is_authenticated:
-#     if current_user.saldo != None:
-#         current_user.saldo += int(dato)
-#         db.session.commit()
-#         return jsonify({'success':True})
-#     else:
-#         current_user.saldo = int(dato)
-#         db.session.commit()
-#         return jsonify({'success':True})
-# else:
-#     return jsonify({'success':False,'message':'User not authenticated'})
+
 
 
 @app.route('/show-current',methods=['GET'])
@@ -306,13 +339,6 @@ def show_current():
     else:
         return jsonify({"succes":False})
     
-
-
-
-
-
-
-
 
 
 
