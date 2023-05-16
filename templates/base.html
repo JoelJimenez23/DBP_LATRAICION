@@ -9,6 +9,20 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pag_1.css') }}">
 </head>
 <body class="body">
-    {% block body %}{% endblock %}
+    <div class="container d-flex justify-content-center align-items-center min-vh-100">
+        <div class="col-md-5">
+            {% block body %}
+
+            {% endblock %}
+        </div>
+    </div>
 </body>
 </html>
+
+
+<!--<div class="row">
+    <div class="col-md-5">
+        <div class="logo-container text-center">
+            <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="Logo" class="logo" >
+        </div>
+    </div>-->

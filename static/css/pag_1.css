@@ -1,6 +1,7 @@
 body {
-    background: url("https://media.giphy.com/media/xTiTnqE811h53uGj3a/giphy.gif") no-repeat 16% center fixed;
-    background-size: auto 100%;
+    background: url("https://media.giphy.com/media/U8VG8SfKICqkPjq4Sl/giphy.gif") no-repeat 90% center fixed,
+                url("https://media.giphy.com/media/U8VG8SfKICqkPjq4Sl/giphy.gif") no-repeat 10% center fixed;
+    background-size: auto 40%;
     background-color: rgb(0, 0, 0);
     color: rgb(207, 0, 0);
   }

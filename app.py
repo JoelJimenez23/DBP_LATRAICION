@@ -69,12 +69,9 @@ def register_user():
         e_mail = request.form.get('e_mail')
         password = request.form.get('saldo')
 
-
-
 @app.route('/login',methods=['GET'])
 def login():
     return render_template('login.html')
-
 
 # Fin de las rutas
 
