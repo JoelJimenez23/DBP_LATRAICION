@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Market place</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #262626;
+    }
+    nav {
+      background-color: #ff0000;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .search-bar {
+      margin-right: 10;
+    }
+    .search-bar input[type="text"] {
+      padding: 10px;
+      border: none;
+      background-color:#464646;
+      color: #c6c1c1;
+      border-radius: 4px;
+      width: 400px;
+    }
+    .search-bar button[type="submit"] {
+      padding: 8px 16px;
+      background-color: #23ac2a;
+      border-radius: 4px;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+    .sell-button {
+      background-color: #ff0000;
+      color: #000000;
+      padding: 10px;
+      border: none;
+      cursor: pointer;
+      font-size: 30px;
+      font-weight: bold;
+      font-family:'Times New Roman', Times, serif;
+      margin-left: -300px; /* Ajusta el margen izquierdo aquí */
+    }
+    .profile-button {
+      background-color: #ff0000;
+      color: #ff0000;
+      padding: 10px;
+      border: none;
+      cursor: pointer;
+    }
+    .profile-button img {
+      width:40px;
+      height: 40px;
+      border-radius: 100%;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="Buscar">
+      <button type="submit" class="bi bi-search">Buscar</button>
+      <!--<button type="submit"><i class="bi bi-search"></i></button>-->
+    </div>
+    <button class="sell-button">vender</button>
+    <button class="profile-button">
+      <img src="static/images/persona.png" alt="Perfil" class="profile-image">
+    </button>
+  </nav>
+
+  <!-- display de skins -->
+
+  <!-- Agregar el enlace al archivo JS de Bootstrap -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Ejemplo de uso del id de la barra de búsqueda en un script
+    var searchInput = document.getElementById("search-input");
+    console.log(searchInput.value); // Acceder al valor del input de búsqueda
+  </script>
+</body>
+</html>

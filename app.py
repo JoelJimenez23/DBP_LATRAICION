@@ -29,10 +29,11 @@ class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.String(36),primary_key=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
     nickname = db.Column(db.String(100),unique=False,nullable=False)
-    skins_hashes = db.Column(db.String(100),nullable=True)
+    skins_hashes = db.Column(db.String(100),unique=False,nullable=True)
     e_mail = db.Column(db.String(100),primary_key=True,nullable=False,unique=True)
     password = db.Column(db.String(100),unique=False,nullable=False)
     saldo = db.Column(db.Integer,nullable=True,server_default='0')
+
 
     def __init__(self,nickname,e_mail,password):
         self.nickname = nickname
@@ -47,6 +48,7 @@ class User(db.Model):
             'e_mail' : self.e_mail,
             'password' : self.password,
             'saldo' : self.saldo,
+            'created_at':self.created_at
         }
 
 
@@ -101,6 +103,9 @@ def register_user():
 def login():
     return render_template('login.html')
 
+@app.route('/market',methods=['GET'])
+def market():
+    return render_template('market.html')
 # Fin de las rutas
 
 def allowed_file(filename):
