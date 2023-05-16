@@ -28,7 +28,7 @@ body {
 
 .registration-form input[type="text"],
 .registration-form input[type="email"],
-.registration-form input[type="number"] {
+.registration-form input[type="password"] {
     width: 100%;
     padding: 10px;
     margin-bottom: 20px;
@@ -36,7 +36,14 @@ body {
     color: rgb(0, 0, 0);
     border: none;
     border-radius: 4px; /* los inputs*/
+    color: white;
 }
+
+.skinloot{
+    text-align: center;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
 
 .registration-form input[type="submit"] {
     width: 100%;
