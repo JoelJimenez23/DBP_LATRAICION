@@ -16,7 +16,7 @@ app = Flask(__name__)
 # Construye la URI de la base de datos
 # db_uri = f
 # Configura la URI en la aplicación Flask
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:230204@localhost:5432/skinloot"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:546362@localhost:5432/skinloot"
 
 
 db = SQLAlchemy(app)
