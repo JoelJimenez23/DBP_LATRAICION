@@ -182,6 +182,10 @@ def register_skin():
     finally:
         db.session.close()
 
+@app.route('/user_config',methods=['GET'])
+@login_required
+def user_config():
+    return render_template('usuario.html')
 
 @app.route('/login',methods=['GET'])
 def login():
