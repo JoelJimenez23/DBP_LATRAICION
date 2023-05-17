@@ -11,7 +11,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:1234@localhost:5432/skinloot"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:546362@localhost:5432/skinloot"
 app.config['UPLOAD_FOLDER'] = 'static/usuarios'
 app.secret_key = 'clave'
 db = SQLAlchemy(app)
@@ -117,14 +117,16 @@ class Transaccion(db.Model):
     nombre_comprador = db.Column(db.String(100), nullable=False)
     nombre_vendedor = db.Column(db.String(100), nullable=False)
     nombre_skin = db.Column(db.String(100), nullable=False)
+    empresa_id = db.Column(db.String(36), db.ForeignKey('empresas.id'), nullable=False)
 
-    def __init__(self, fecha_inicio, precio, comision, nombre_comprador, nombre_vendedor, nombre_skin):
+    def __init__(self, fecha_inicio, precio, comision, nombre_comprador, nombre_vendedor, nombre_skin, empresa_id):
         self.fecha_inicio = fecha_inicio
         self.precio = precio
         self.comision = comision
         self.nombre_comprador = nombre_comprador
         self.nombre_vendedor = nombre_vendedor
         self.nombre_skin = nombre_skin
+        self.empresa_id = empresa_id
 
     def serialize(self):
         return {
@@ -134,7 +136,8 @@ class Transaccion(db.Model):
             'comision': self.comision,
             'nombre_comprador': self.nombre_comprador,
             'nombre_vendedor': self.nombre_vendedor,
-            'nombre_skin': self.nombre_skin
+            'nombre_skin': self.nombre_skin,
+            'empresa_id': self.empresa_id
         }
 class Trade(db.Model):
     __tablename__ = 'trades'
@@ -182,8 +185,9 @@ class Empresa(db.Model):
             'transacciones': [transaccion.serialize() for transaccion in self.transacciones]
         }
 
+
 #with app.app_context():db.drop_all()
-#with app.app_context():db.create_all()
+with app.app_context():db.create_all()
 # Empezamos las rutas:
 
 @app.route('/',methods=['GET'])
@@ -198,7 +202,7 @@ def load_user(user_id):
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for("index0.html"))
+    return redirect(url_for("index"))
 
 @app.route('/register',methods=['GET'])
 def register():
