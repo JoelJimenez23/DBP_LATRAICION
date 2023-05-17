@@ -145,6 +145,11 @@
  transform: translateX(-50%);
 }
 
+.form-group {
+ margin-bottom: 10px;
+ padding: 5px;
+}
+
  </style>
 </head>
 
@@ -187,7 +192,7 @@
 <div class="modal-dialog">
 <div class="modal-content">
 <div class="modal-header">
-<h5 class="modal-title" id="changeNameModalLabel">Change name</h5>
+<h5 class="modal-title" id="changeNameModalLabel">Change name</h5> 
 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
 <span aria-hidden="true">×</span>
 </button>
@@ -259,6 +264,7 @@
 
 <!-- Create a modal component for adding skin -->
 <!-- Create a modal component for adding skin -->
+<!-- Create a modal component for adding skin -->
 <div class="modal fade" id="addSkinModal" tabindex="-1" aria-labelledby="addSkinModalLabel" aria-hidden="true">
     <div class="modal-dialog">
     <div class="modal-content">
@@ -273,36 +279,27 @@
     <form id="addSkinForm">
     <div class="form-group">
     <label for="nameInput">Choose a name:</label>
-    <div class="btn-group btn-group-toggle" data-toggle="buttons">
-    <input type="radio" name="nameInput" id="nameInput1" value="Blood Moon" autocomplete="off" required>
-    <label class="btn btn-secondary active" for="nameInput1">Blood Moon</label>
-    <input type="radio" name="nameInput" id="nameInput2" value="Arcade" autocomplete="off">
-    <label class="btn btn-secondary" for="nameInput2">Arcade</label>
-    <input type="radio" name="nameInput" id="nameInput3" value="Project" autocomplete="off">
-    <label class="btn btn-secondary" for="nameInput3">Project</label>
-    </div>
+    <select class="custom-select" id="nameInput" multiple required>
+    <option value="Blood Moon">Blood Moon</option>
+    <option value="Arcade">Arcade</option>
+    <option value="Project">Project</option>
+    </select>
     </div>
     <div class="form-group">
     <label for="championInput">Choose a champion:</label>
-    <div class="btn-group btn-group-toggle" data-toggle="buttons">
-    <input type="radio" name="championInput" id="championInput1" value="Yasuo" autocomplete="off" required>
-    <label class="btn btn-secondary active" for="championInput1">Yasuo</label>
-    <input type="radio" name="championInput" id="championInput2" value="Ahri" autocomplete="off">
-    <label class="btn btn-secondary" for="championInput2">Ahri</label>
-    <input type="radio" name="championInput" id="championInput3" value= "Zed" autocomplete= "off">
-    <label class= "btn btn-secondary " for= "championInput3 ">Zed</label>
-    </div>
+    <select class="custom-select" id="championInput" multiple required>
+    <option value="Yasuo">Yasuo</option>
+    <option value="Ahri">Ahri</option>
+    <option value= "Zed">Zed</option>
+    </select>
     </div>
     <div class= "form-group ">
     <label for= "rarityInput ">Choose a rarity:</label>
-    <div class= "btn-group btn-group-toggle " data-toggle= "buttons ">
-    <input type= "radio " name= "rarityInput " id= "rarityInput1 " value= "Common " autocomplete= "off " required>
-    <label class= "btn btn-secondary active " for= "rarityInput1 ">Common</label>
-    <input type= "radio " name= "rarityInput " id= "rarityInput2 " value= "Rare " autocomplete= "off ">
-    <label class= "btn btn-secondary " for= "rarityInput2 ">Rare</label>
-    <input type= "radio " name= "rarityInput " id= "rarityInput3 " value= "Epic " autocomplete= "off ">
-    <label class= "btn btn-secondary " for= "rarityInput3 ">Epic</label>
-    </div>
+    <select class= "custom-select " id= "rarityInput " multiple required>
+    <option value= "Common ">Common</option>
+    <option value= "Rare ">Rare</option>
+    <option value= "Epic ">Epic</option>
+    </select>
     </div>
     <button type= "submit " class= "btn btn-primary mt-3 ">Submit</button>
     </form>
@@ -311,6 +308,7 @@
     </div>
     </div>
     </div>
+    
     
  </div>
 
