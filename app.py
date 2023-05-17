@@ -198,7 +198,7 @@ def load_user(user_id):
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for("index0.html"))
+    return redirect(url_for("index"))
 
 @app.route('/register',methods=['GET'])
 def register():
