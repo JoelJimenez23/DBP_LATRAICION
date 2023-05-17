@@ -16,7 +16,7 @@
             <div class="mb-3">
                 <script>
                     function loadSkinOptions() {
-                        var skin_id = document.getElementById('skin_id');
+                        var skin_nombre = document.getElementById('skin_nombre');
 
                         fetch('/show-skins-current')
                             .then(response => response.json())
@@ -25,15 +25,18 @@
                                     var skins = data.serialized;
 
                                     // Clear existing options
-                                    skin_id.innerHTML = "";
+                                    skin_nombre.innerHTML = "";
 
                                     // Generate the options for the select element
                                     for (var i = 0; i < skins.length; i++) {
                                         var skin = skins[i];
                                         var option = document.createElement('option');
-                                        option.value = skin.id;
+                                        option.value = skin.name;
                                         option.textContent = skin.name;
-                                        skin_id.appendChild(option);
+                                        skin_nombre.appendChild(option);
+                                        option.addEventListener('click', function() {
+                                            mensajero(skin.id, skin.campeon);
+                                        });
                                     }
                                 } else {
                                     console.error('Error retrieving current skins:', data.error);
@@ -42,14 +45,53 @@
                             .catch(error => {
                                 console.error('Error retrieving current skins:', error);
                             });
+                    }          
+
+
+                                    
+                    function CreatePost(){
+                        const skinForm = document.querySelector('#skinForm',)
+                        skinForm.addEventListener('submit', handlingSubmitPost)
+                    }   
+
+                    function handlingSubmitPost(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const skinForm = e.currentTarget;
+                    const previousController = pendingForms.get(skinForm);
+                    if (previousController) {
+                        previousController.abort();
                     }
-                    document.addEventListener('DOMContentLoaded', function() {
-                        loadSkinOptions();  
+
+                    const controller = new AbortController();
+                    pendingForms.set(skinForm, controller);
+
+                    const formData = new FormData(skinForm);
+
+                    fetch('/create-PostVenta', {
+                        method: 'POST',
+                        body: formData,
+                        signal: controller.signal,
                     })
+                    .then(response => response.json())
+                    .then(responseJson => {
+                        if (responseJson.success) {
+                            console.log('success: True');
+                            console.log(responseJson);
+                        } else {
+                            console.log('success: False');
+                            console.log(responseJson);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                    }
                 </script>
 
-                <label for="skin_id" class="form-label">Seleccionar Skin:</label>
-                <select class="form-control" id="skin_id" name="skin_id" required>
+                <label for="skin_nombre" class="form-label">Seleccionar Skin:</label>
+                <select class="form-control" id="skin_nombre" name="skin_nombre" required>
                 </select>
             </div>
 
@@ -63,44 +105,27 @@
     </div>
 </div>
 
-<script>
-    function CreatePost(){
-        const skinForm = document.querySelector('#skinForm',)
-        skinForm.addEventListener('submit', handlingSubmitPost)
-    }   
 
-    function handlingSubmitPost(e){
-        e.preventDefault()
-        e.stopPropagation()
+    // function mensajero(id,campeon){
+    //     var formData = new FormData();
+    //     formData.append('skin_id',id);
+    //     formData.append('campeon',campeon);
 
-        const skinForm = e.currentTarget
-        const previousController = pendingForms.get(skinForm)
-        if (previousController) {
-        previousController.abort()
-        }
-    
-        const controller = new AbortController()
-        pendingForms.set(skinForm, controller)
+    //     fetch('/create-PostVenta',{
+    //         method : 'POST', body: formData,
+    //     }).then(response => response.json())
+    //         .then(data=>{
+    //             if(data.success){
+    //                 return ({'success':true});
+    //             }
+    //             else{
+    //                 return ({'success':false});
+    //             }
+    //         })
+    // }
 
-        //console.log('skinForm: ', skinForm)
-        const formData = new FormData(skinForm)
 
-        const skin_id =  document.getElementById('skin_id');
-        const selectedSkinId = skin_id.value;
-        formData.append('skin_id', selectedSkinId);
 
-        fetch('/create-PostVenta',{
-            method: 'POST',
-            body: formData, 
-            signal: controller.signal,
-        }).then((response) => response.json()).then((responseJson)=>{
-            if(responseJson.success){
-                console.log('success: True')
-            }
-            else{
-                console.log('success: False')
-            }
-        })
-    }
-</script>
+
+
 {%endblock%}
