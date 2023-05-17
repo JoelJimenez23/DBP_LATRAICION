@@ -170,16 +170,17 @@
  </div>
  <div class="button text-center" data-toggle="modal" data-target="#changePictureModal">
     <h4 class="card-title">Change profile picture</h4>
-    </div>
- <div class="button text-center">
- <h4 class="card-title">Add credits</h4>
- </div>
+    </div>    
+    <div class="button text-center" data-toggle="modal" data-target="#addCreditsModal">
+        <h4 class="card-title">Add credits</h4>
+        </div>        
  <div class="button text-center">
  <h4 class="card-title">View skins</h4>
  </div>
- <div class="button text-center">
- <h4 class="card-title">Add skins</h4>
+ <div class = "button text-center" data-toggle="modal" data-target="#addSkinModal">
+ <h4 class=" card-title">Add skin</h4>
  </div>
+ 
 
  <!-- Create a modal component for changing name -->
 <div class="modal fade" id="changeNameModal" tabindex="-1" aria-labelledby="changeNameModalLabel" aria-hidden="true">
@@ -206,6 +207,111 @@
 </div>
 </div>
 
+<!-- Create a modal component for changing profile picture -->
+<div class="modal fade" id="changePictureModal" tabindex="-1" aria-labelledby="changePictureModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+    <div class="modal-content">
+    <div class="modal-header">
+    <h5 class="modal-title" id="changePictureModalLabel">Change profile picture</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+    <span aria-hidden="true">×</span>
+    </button>
+    </div>
+    <div class="modal-body">
+    <!-- Create a form with an input for new picture and a button to submit -->
+    <form id="changePictureForm">
+    <div class="form-group">
+    <label for="newPictureInput">Choose a new picture:</label>
+    <input type="file" class="form-control" id="newPictureInput" accept="image/*" required>
+    </div>
+    <button type="submit" class="btn btn-primary mt-3">Submit</button>
+    </form>
+    </div>
+    
+    </div>
+    </div>
+    </div>
+    
+    <div class="modal fade" id="addCreditsModal" tabindex="-1" aria-labelledby="addCreditsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+        <h5 class="modal-title" id="addCreditsModalLabel">Add credits</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">×</span>
+        </button>
+        </div>
+        <div class="modal-body">
+        <!-- Create a form with an input for credits and a button to submit -->
+        <form id="addCreditsForm">
+        <div class="form-group">
+        <label for="creditsInput">Enter the amount of credits you want to add:</label>
+        <input type="number" class="form-control" id="creditsInput" min="1" required>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Submit</button>
+        </form>
+        </div>
+        
+        </div>
+        </div>
+        </div>
+
+
+<!-- Create a modal component for adding skin -->
+<!-- Create a modal component for adding skin -->
+<div class="modal fade" id="addSkinModal" tabindex="-1" aria-labelledby="addSkinModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+    <div class="modal-content">
+    <div class="modal-header">
+    <h5 class="modal-title" id="addSkinModalLabel">Add skin</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+    <span aria-hidden="true">×</span>
+    </button>
+    </div>
+    <div class="modal-body">
+    <!-- Create a form with three inputs for name, champion and rarity and a button to submit -->
+    <form id="addSkinForm">
+    <div class="form-group">
+    <label for="nameInput">Choose a name:</label>
+    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+    <input type="radio" name="nameInput" id="nameInput1" value="Blood Moon" autocomplete="off" required>
+    <label class="btn btn-secondary active" for="nameInput1">Blood Moon</label>
+    <input type="radio" name="nameInput" id="nameInput2" value="Arcade" autocomplete="off">
+    <label class="btn btn-secondary" for="nameInput2">Arcade</label>
+    <input type="radio" name="nameInput" id="nameInput3" value="Project" autocomplete="off">
+    <label class="btn btn-secondary" for="nameInput3">Project</label>
+    </div>
+    </div>
+    <div class="form-group">
+    <label for="championInput">Choose a champion:</label>
+    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+    <input type="radio" name="championInput" id="championInput1" value="Yasuo" autocomplete="off" required>
+    <label class="btn btn-secondary active" for="championInput1">Yasuo</label>
+    <input type="radio" name="championInput" id="championInput2" value="Ahri" autocomplete="off">
+    <label class="btn btn-secondary" for="championInput2">Ahri</label>
+    <input type="radio" name="championInput" id="championInput3" value= "Zed" autocomplete= "off">
+    <label class= "btn btn-secondary " for= "championInput3 ">Zed</label>
+    </div>
+    </div>
+    <div class= "form-group ">
+    <label for= "rarityInput ">Choose a rarity:</label>
+    <div class= "btn-group btn-group-toggle " data-toggle= "buttons ">
+    <input type= "radio " name= "rarityInput " id= "rarityInput1 " value= "Common " autocomplete= "off " required>
+    <label class= "btn btn-secondary active " for= "rarityInput1 ">Common</label>
+    <input type= "radio " name= "rarityInput " id= "rarityInput2 " value= "Rare " autocomplete= "off ">
+    <label class= "btn btn-secondary " for= "rarityInput2 ">Rare</label>
+    <input type= "radio " name= "rarityInput " id= "rarityInput3 " value= "Epic " autocomplete= "off ">
+    <label class= "btn btn-secondary " for= "rarityInput3 ">Epic</label>
+    </div>
+    </div>
+    <button type= "submit " class= "btn btn-primary mt-3 ">Submit</button>
+    </form>
+    </div>
+    
+    </div>
+    </div>
+    </div>
+    
  </div>
 
 <!-- Link to jQuery CDN -->
@@ -255,9 +361,7 @@ alert("Your name has been changed successfully!");
 
 </script>
 
-
 <script>
-
 // Get the form element by id
 var form = document.getElementById("changePictureForm");
 
@@ -270,7 +374,7 @@ event.preventDefault();
 // Get the input element by id
 var input = document.getElementById("newPictureInput");
 
-// Get the file object from input
+// Get the value of input
 var newPicture = input.files[0];
 
 // Check if input is not empty
@@ -279,14 +383,14 @@ if (newPicture) {
 // Create a FileReader object
 var reader = new FileReader();
 
-// Add an event listener for load event
-reader.addEventListener("load", function() {
+// Define a function to execute when the file is loaded
+reader.onload = function(e) {
 
 // Get the user-image element by class name
-var userImage = document.getElementsByClassName("user-image")[0];
+var image = document.getElementsByClassName("user-image")[0];
 
-// Change its src attribute to the result of reader
-userImage.src = reader.result;
+// Change its src attribute to reader result
+image.src = e.target.result;
 
 // Hide modal
 $('#changePictureModal').modal('hide');
@@ -297,10 +401,142 @@ input.value = "";
 // Show alert message
 alert("Your profile picture has been changed successfully!");
 
-});
+};
 
 // Read the file as a data URL
 reader.readAsDataURL(newPicture);
+
+}
+
+});
+</script>
+
+<script>
+    // Get the form element by id
+var form = document.getElementById("addCreditsForm");
+
+// Add an event listener for submit event
+form.addEventListener("submit", function(event) {
+
+// Prevent default form submission behavior
+event.preventDefault();
+
+// Get the input element by id
+var input = document.getElementById("creditsInput");
+
+// Get the value of input
+var credits = input.value;
+
+// Check if input is not empty
+if (credits) {
+
+// Get the current credits from localStorage or set it to zero if not found
+var currentCredits = localStorage.getItem("credits") || 0;
+
+// Parse currentCredits as a number
+currentCredits = Number(currentCredits);
+
+// Add credits to currentCredits
+currentCredits += Number(credits);
+
+// Store currentCredits in localStorage
+localStorage.setItem("credits", currentCredits);
+
+// Hide modal
+$('#addCreditsModal').modal('hide');
+
+// Clear input value
+input.value = "";
+
+// Show alert message
+alert("You have added " + credits + " credits successfully! Your current balance is " + currentCredits + " credits.");
+
+}
+
+});
+
+</script>
+
+<script>
+// Get the form element by id
+var form = document.getElementById("addSkinForm");
+
+// Add an event listener for submit event
+form.addEventListener("submit", function(event) {
+
+// Prevent default form submission behavior
+event.preventDefault();
+
+// Get the input elements by name
+var nameInputs = document.getElementsByName("nameInput");
+var championInputs = document.getElementsByName("championInput");
+var rarityInputs = document.getElementsByName("rarityInput");
+
+// Declare variables for name, champion and rarity values
+var name, champion, rarity;
+
+// Loop through each input group and get the checked value
+for (var i = 0; i < nameInputs.length; i++) {
+if (nameInputs[i].checked) {
+name = nameInputs[i].value;
+break;
+}
+}
+for (var i = 0; i < championInputs.length; i++) {
+if (championInputs[i].checked) {
+champion = championInputs[i].value;
+break;
+}
+}
+for (var i = 0; i < rarityInputs.length; i++) {
+if (rarityInputs[i].checked) {
+rarity = rarityInputs[i].value;
+break;
+}
+}
+
+// Check if all inputs are not empty
+if (name && champion && rarity) {
+
+// Get the current skins from localStorage or set it to an empty array if not found
+var currentSkins = localStorage.getItem("skins") || [];
+
+// Parse currentSkins as an array
+currentSkins = JSON.parse(currentSkins);
+
+// Create a new skin object with name, champion and rarity properties
+var newSkin = {
+name: name,
+champion: champion,
+rarity: rarity
+};
+
+// Push newSkin to currentSkins array
+currentSkins.push(newSkin);
+
+// Store currentSkins in localStorage as a string
+localStorage.setItem("skins", JSON.stringify(currentSkins));
+
+// Hide modal
+$('#addSkinModal').modal('hide');
+
+// Clear input values
+for (var i = 0; i < nameInputs.length; i++) {
+nameInputs[i].checked = false;
+}
+for (var i = 0; i < championInputs.length; i++) {
+championInputs[i].checked = false;
+}
+for (var i = 0; i < rarityInputs.length; i++) {
+rarityInputs[i].checked = false;
+}
+
+// Show alert message
+alert("You have added a new skin successfully! Your current skins are: \n\n"
++ currentSkins.map(function(skin) {
+return skin.name + ": (" + skin.champion + ", "
++ skin.rarity + ")";
+}).join("\n"));
 
 }
 
