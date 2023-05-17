@@ -83,6 +83,7 @@ class User(UserMixin,db.Model):
 class Postventa(db.Model):
     __tablename__ = 'postventa'
     id = db.Column(db.String(36),primary_key=True,default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
+    title = db.Column(db.String(100),unique=False,nullable=False)
     user_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
     user = db.relationship('User', backref=db.backref('postventa', post_update=True))
     skin_id = db.Column(db.String(36), db.ForeignKey('skins.id'), nullable=False)
@@ -90,7 +91,8 @@ class Postventa(db.Model):
     skin = db.relationship('Skin', backref=db.backref('postventa', post_update=True))
     status = db.Column(db.String(100),unique=False,nullable=False)
 
-    def __init__(self,user_id,skin_id,status):
+    def __init__(self,title,user_id,skin_id,status):
+        self.title = title
         self.user_id = user_id
         self.skin_id = skin_id
         self.status = status
@@ -98,6 +100,7 @@ class Postventa(db.Model):
     def serialize(self):
         return{
             'id': self.id,
+            'title' : self.title,
             'user_id' : self.user_id,
             'skin_id': self.skin_id,
             'status' : self.status,
