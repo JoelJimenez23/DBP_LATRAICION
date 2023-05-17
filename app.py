@@ -1,10 +1,10 @@
-from flask import Flask,render_template,jsonify,request
+from flask import Flask,render_template,jsonify,request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 import uuid
 from datetime import datetime
 import sys
 import os
-from flask_login import login_user,login_required,current_user,LoginManager,UserMixin
+from flask_login import login_user,login_required,current_user,LoginManager,UserMixin, logout_user
 
 app = Flask(__name__)
 login_manager = LoginManager()
@@ -80,8 +80,32 @@ class User(UserMixin,db.Model):
             'image' : self.image,
         }
     
+class Postventa(db.Model):
+    __tablename__ = 'postventa'
+    id = db.Column(db.String(36),primary_key=True,default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
+    title = db.Column(db.String(100),unique=False,nullable=False)
+    user_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
+    user = db.relationship('User', backref=db.backref('postventa', post_update=True))
+    skin_id = db.Column(db.String(36), db.ForeignKey('skins.id'), nullable=False)
+    skin_image = db.Column(db.String(500),nullable=True)
+    skin = db.relationship('Skin', backref=db.backref('postventa', post_update=True))
+    status = db.Column(db.String(100),unique=False,nullable=False)
 
+    def __init__(self,title,user_id,skin_id,status):
+        self.title = title
+        self.user_id = user_id
+        self.skin_id = skin_id
+        self.status = status
 
+    def serialize(self):
+        return{
+            'id': self.id,
+            'title' : self.title,
+            'user_id' : self.user_id,
+            'skin_id': self.skin_id,
+            'status' : self.status,
+            'skin_image' : self.skin_image
+        }
 
 #with app.app_context():db.drop_all()
 with app.app_context():db.create_all()
@@ -95,7 +119,11 @@ def index():
 def load_user(user_id):
     return User.query.get(user_id)
 
-
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("index"))
 
 @app.route('/register',methods=['GET'])
 def register():
