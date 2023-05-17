@@ -568,7 +568,7 @@ def hito():
 
 @app.route('/comprar-skin', methods=["POST"])
 @login_required
-def comprar_skin():        
+def comprar_skin():
     try:
         if current_user.is_authenticated:
             skin_uid = request.form.get('skin_on_sale')
@@ -607,9 +607,27 @@ def comprar_skin():
                 skin = Skin.query.filter_by(id=skin_uid).first()
                 skin.user_id = current_user.id
 
+                # Create and commit the transaction
+                transaction = Transaccion(
+                    fecha_inicio=datetime.now(),
+                    precio=float(precio),
+                    comision=0.0,  # Set the appropriate commission value
+                    nombre_comprador=current_user.nickname,
+                    nombre_vendedor=seller.nickname,
+                    nombre_skin=skin.name,
+                    empresa_id=''  # Set the appropriate empresa_id value
+                )
+
+                db.session.add(transaction)
                 db.session.commit()
 
-                return jsonify({'success': True, 'current_user': current_user.id, 'seller': seller.id, 'skin_id': skin_uid, 'precio': precio})
+                return jsonify({
+                    'success': True,
+                    'current_user': current_user.id,
+                    'seller': seller.id,
+                    'skin_id': skin_uid,
+                    'precio': precio
+                })
         else:
             return jsonify({'success': False, 'message': 'user not authenticated'})
     except Exception as e:
