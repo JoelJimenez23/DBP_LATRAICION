@@ -34,46 +34,216 @@ var skinsContainer = document.getElementById("skins-container");
 
 var currentRow = null;
 
+// function createSkins() {
+//         skinsContainer.innerHTML = "";
+//         for (var i = 0; i < skins.length; i++) {
+//             var skin = skins[i];
+//             var skinBox = document.createElement("div");
+//             skinBox.className = "skin-box";
+//             var skinImage = document.createElement("img");
+//             skinImage.src = skin.image;
+//             skinImage.alt = skin.name;
+
+//             var skinName = document.createElement("h3");
+//             skinName.textContent = skin.name;
+
+//             var skinPrice = document.createElement("p");
+//             skinPrice.textContent = skin.price;
+
+//             var buyButton = document.createElement("button");
+//             buyButton.className = "buy-button";
+//             buyButton.textContent = "Buy";
+
+//             skinBox.appendChild(skinImage);
+//             skinBox.appendChild(skinName);
+//             skinBox.appendChild(skinPrice);
+//             skinBox.appendChild(buyButton);
+//             if (i % 3 == 0) {
+//             currentRow = document.createElement("div");
+//             currentRow.className = "row";
+
+//             skinsContainer.appendChild(currentRow);
+//             }
+
+
+//             var column = document.createElement("div");
+//             column.className = "col-md-4";
+
+//             column.appendChild(skinBox);
+
+//             currentRow.appendChild(column);
+//             }
+// }
+
+// function createSkins() {
+//     skinsContainer.innerHTML = "";
+
+//     // Hacer una solicitud HTTP a la API
+//     fetch('/show-skins')
+//         .then(response => response.json())
+//         .then(data => {
+//             if (data.success) {
+//                 var posts = data.posts;
+
+//                 // Generar las skins en el frontend
+//                 for (var i = 0; i < skins.length; i++) {
+//                     var post = posts[i];
+//                     var skinBox = document.createElement("div");
+//                     skinBox.className = "skin-box";
+//                     var skinImage = document.createElement("img");
+//                     skinImage.src = post.image;
+//                     skinImage.alt = post.name;
+
+//                     var skinName = document.createElement("h3");
+//                     skinName.textContent = post.name;
+
+//                     var skinPrice = document.createElement("p");
+//                     skinPrice.textContent = post.price;
+
+//                     var buyButton = document.createElement("button");
+//                     buyButton.className = "buy-button";
+//                     buyButton.textContent = "Buy";
+
+//                     skinBox.appendChild(skinImage);
+//                     skinBox.appendChild(skinName);
+//                     skinBox.appendChild(skinPrice);
+//                     skinBox.appendChild(buyButton);
+//                     if (i % 3 == 0) {
+//                         currentRow = document.createElement("div");
+//                         currentRow.className = "row";
+
+//                         skinsContainer.appendChild(currentRow);
+//                     }
+
+//                     var column = document.createElement("div");
+//                     column.className = "col-md-4";
+
+//                     column.appendChild(skinBox);
+
+//                     currentRow.appendChild(column);
+//                 }
+//             } else {
+//                 console.error("Error retrieving skins:", data.error);
+//             }
+//         })
+//         .catch(error => {
+//             console.error("Error retrieving skins:", error);
+//         });
+// }
+
+
 function createSkins() {
-        skinsContainer.innerHTML = "";
-        for (var i = 0; i < skins.length; i++) {
-            var skin = skins[i];
+    skinsContainer.innerHTML = "";
+  
+    // Make an HTTP request to the API
+    fetch('/show-posts')
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          var posts = data.serialized;
+  
+          // Generate the skins in the frontend
+          for (var i = 0; i < posts.length; i++) {
+            var post = posts[i];
             var skinBox = document.createElement("div");
             skinBox.className = "skin-box";
             var skinImage = document.createElement("img");
-            skinImage.src = skin.image;
-            skinImage.alt = skin.name;
-
+            skinImage.src = post.skin_image;
+            skinImage.alt = post.nombre;
+  
             var skinName = document.createElement("h3");
-            skinName.textContent = skin.name;
-
+            skinName.textContent = post.nombre;
+  
             var skinPrice = document.createElement("p");
-            skinPrice.textContent = skin.price;
-
+            skinPrice.textContent = post.precio;
+  
             var buyButton = document.createElement("button");
             buyButton.className = "buy-button";
             buyButton.textContent = "Buy";
-
+  
             skinBox.appendChild(skinImage);
             skinBox.appendChild(skinName);
             skinBox.appendChild(skinPrice);
             skinBox.appendChild(buyButton);
             if (i % 3 == 0) {
-            currentRow = document.createElement("div");
-            currentRow.className = "row";
-
-            skinsContainer.appendChild(currentRow);
+              currentRow = document.createElement("div");
+              currentRow.className = "row";
+  
+              skinsContainer.appendChild(currentRow);
             }
-
-
+  
             var column = document.createElement("div");
             column.className = "col-md-4";
-
+  
             column.appendChild(skinBox);
-
+  
             currentRow.appendChild(column);
-            }
-}
+          }
+        } else {
+          console.error("Error retrieving skins:", data.error);
+        }
+      })
+      .catch(error => {
+        console.error("Error retrieving skins:", error);
+      });
+  }
+  
+
+// function createSkins() {
+//     skinsContainer.innerHTML = "";
+
+//     // Hacer una solicitud HTTP a la API
+//     fetch('/show-skins')
+//         .then(response => response.json())
+//         .then(data => {
+//             if (data.success) {
+//                 var skins = data.skins;
+
+//                 // Generar las skins en el frontend
+//                 for (var i = 0; i < skins.length; i++) {
+//                     var skin = skins[i];
+//                     var skinBox = document.createElement("div");
+//                     skinBox.className = "skin-box";
+//                     var skinImage = document.createElement("img");
+//                     skinImage.src = skin.image;
+//                     skinImage.alt = skin.name;
+
+//                     var skinName = document.createElement("h3");
+//                     skinName.textContent = skin.name;
+
+//                     var skinPrice = document.createElement("p");
+//                     skinPrice.textContent = skin.price;
+
+//                     var buyButton = document.createElement("button");
+//                     buyButton.className = "buy-button";
+//                     buyButton.textContent = "Buy";
+
+//                     skinBox.appendChild(skinImage);
+//                     skinBox.appendChild(skinName);
+//                     skinBox.appendChild(skinPrice);
+//                     skinBox.appendChild(buyButton);
+//                     if (i % 3 == 0) {
+//                         currentRow = document.createElement("div");
+//                         currentRow.className = "row";
+
+//                         skinsContainer.appendChild(currentRow);
+//                     }
+
+//                     var column = document.createElement("div");
+//                     column.className = "col-md-4";
+
+//                     column.appendChild(skinBox);
+
+//                     currentRow.appendChild(column);
+//                 }
+//             } else {
+//                 console.error("Error retrieving skins:", data.error);
+//             }
+//         })
+//         .catch(error => {
+//             console.error("Error retrieving skins:", error);
+//         });
+// }
 
 createSkins();
 

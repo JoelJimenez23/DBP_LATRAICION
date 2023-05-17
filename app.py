@@ -11,7 +11,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:546362@localhost:5432/skinloot"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:230204@localhost:5432/skinloot"
 app.config['UPLOAD_FOLDER'] = 'static/usuarios'
 app.secret_key = 'clave'
 db = SQLAlchemy(app)
@@ -84,18 +84,26 @@ class Postventa(db.Model):
     __tablename__ = 'postventa'
     id = db.Column(db.String(36),primary_key=True,default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
     title = db.Column(db.String(100),unique=False,nullable=False)
+    nombre = db.Column (db.String(100), nullable=False)
+    campeon = db.Column (db.String(100), nullable=False)
     user_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
-    user = db.relationship('User', backref=db.backref('postventa', post_update=True))
     skin_id = db.Column (db.String(36), db.ForeignKey('skins.id'), nullable=False)
     skin_image = db.Column(db.String(500),nullable=True)
+    on_sale = db.Column(db.Boolean,unique=False,nullable=False)
+    precio = db.Column(db.Integer, nullable=False)
     skin = db.relationship('Skin', backref=db.backref('postventa', post_update=True))
-    status = db.Column(db.String(100),unique=False,nullable=False)
+    user = db.relationship('User', backref=db.backref('postventa', post_update=True))
 
-    def __init__(self,title,user_id,skin_id,status):
+
+    def __init__(self,title,user_id,skin_id,on_sale,precio,nombre,campeon):
         self.title = title
         self.user_id = user_id
         self.skin_id = skin_id
-        self.status = status
+        self.on_sale = on_sale
+        self.precio = precio
+        self.nombre = nombre
+        self.campeon = campeon
+
 
     def serialize(self):
         return{
@@ -103,8 +111,11 @@ class Postventa(db.Model):
             'title' : self.title,
             'user_id' : self.user_id,
             'skin_id': self.skin_id,
-            'status' : self.status,
-            'skin_image' : self.skin_image
+            'on_sale' : self.on_sale,
+            'skin_image' : self.skin_image,
+            'precio' : self.precio,
+            'nombre' : self.nombre,
+            'campeon': self.campeon
         }
 
 class Transaccion(db.Model):
@@ -253,6 +264,55 @@ def register_skin():
     finally:
         db.session.close()
 
+# 'id': self.id,
+# 'title' : self.title,
+# 'user_id' : self.user_id,
+# 'skin_id': self.skin_id,
+# 'on_sale' : self.on_sale,
+# 'skin_image' : self.skin_image,
+# 'precio' : self.precio
+
+@app.route('/test-post', methods=["GET"])
+def postventas():
+    return render_template('formVenta.html')
+
+
+@app.route('/create-PostVenta',methods=['POST'])
+def create_postventa():
+    try:
+        if current_user.is_authenticated:
+            title = request.form.get('title')
+            user_id = current_user.id
+            nombre = request.form.get('nombre')
+            campeon = request.form.get('campeon')
+            skin_id = request.form.get('skin_id')
+            on_sale = True
+            precio = request.form.get('precio')
+
+            already_skin = Postventa.query.filter_by(skin_id=skin_id).first()
+            if already_skin is not None and already_skin.skin_id == skin_id:
+                return jsonify({"success":False,"message":"skin already published"})    
+            else:
+                postventa = Postventa(title,user_id,skin_id,on_sale,precio,nombre,campeon)
+                db.session.add(postventa)
+                db.session.commit()
+                postventa.skin_image = os.path.join("static/campeones",f'{campeon}',f'{nombre}.jpg')
+                db.session.commit()
+                return jsonify({'success':True,'title':title,'user_id':user_id,'nombre':nombre,'campeon':campeon,'skin_id':skin_id,'on_sale':on_sale})
+        else:
+            return jsonify({'success':False,'message':'not logged'})
+    except Exception as e:
+        print(e)
+        print(sys.exc_info())
+        db.session.rollback()
+        return jsonify({'success':False,'message':'Error al crear skin'})
+    finally:
+        db.session.close()
+
+
+
+
+
 @app.route('/user_config',methods=['GET'])
 @login_required
 def user_config():
@@ -298,7 +358,6 @@ def register_user():
     finally:
         db.session.close()
 
-
 @app.route('/login',methods=['GET'])
 def login():
     return render_template('login0.html')
@@ -320,14 +379,10 @@ def teoria():
         print(e)
         return jsonify({'success': False})
     
-
 @app.route('/market',methods=['GET'])
 @login_required
 def market():
     return render_template('market2.html')
-
-
-
 
 @app.route('/show-skins',methods=['GET'])
 def showSkins():
@@ -337,6 +392,17 @@ def showSkins():
         return jsonify({'success':True,"skins":skins_serialized}),200
     except Exception as e:
         return jsonify({"success":False})
+
+@app.route('/show-posts',methods=['GET'])
+def showPosts():
+    try:
+        # posts = Postventa.query.filter_by(Postventa.on_sale == True).first()
+        posts = Postventa.query.all()
+        posts_serialized = [post.serialize() for post in posts]
+        return jsonify({'success':True,"serialized":posts_serialized})
+    except Exception as e:
+        return jsonify({"success":False})
+
 
 
 # @app.route('/change-saldo',methods=['POST'])
