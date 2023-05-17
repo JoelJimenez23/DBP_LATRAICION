@@ -4,6 +4,14 @@
 {% block title %}Post de venta{% endblock %}
 {%block body%}
 <div class="container">
+    
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<script>
+
+
+</script>
     <div class="form-container">
         <h1>Publicación de Skins</h1>
         <form id="skinForm">
@@ -11,90 +19,11 @@
                 <label for="title" class="form-label">Título de la Publicación:</label>
                 <input type="text" class="form-control" id="title" name="title" required>
             </div>
-
-
             <div class="mb-3">
-                <script>
-                    function loadSkinOptions() {
-                        var skin_nombre = document.getElementById('skin_nombre');
-
-                        fetch('/show-skins-current')
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success) {
-                                    var skins = data.serialized;
-
-                                    // Clear existing options
-                                    skin_nombre.innerHTML = "";
-
-                                    // Generate the options for the select element
-                                    for (var i = 0; i < skins.length; i++) {
-                                        var skin = skins[i];
-                                        var option = document.createElement('option');
-                                        option.value = skin.name;
-                                        option.textContent = skin.name;
-                                        skin_nombre.appendChild(option);
-                                        option.addEventListener('click', function() {
-                                            mensajero(skin.id, skin.campeon);
-                                        });
-                                    }
-                                } else {
-                                    console.error('Error retrieving current skins:', data.error);
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error retrieving current skins:', error);
-                            });
-                    }          
-
-
-                                    
-                    function CreatePost(){
-                        const skinForm = document.querySelector('#skinForm',)
-                        skinForm.addEventListener('submit', handlingSubmitPost)
-                    }   
-
-                    function handlingSubmitPost(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    const skinForm = e.currentTarget;
-                    const previousController = pendingForms.get(skinForm);
-                    if (previousController) {
-                        previousController.abort();
-                    }
-
-                    const controller = new AbortController();
-                    pendingForms.set(skinForm, controller);
-
-                    const formData = new FormData(skinForm);
-
-                    fetch('/create-PostVenta', {
-                        method: 'POST',
-                        body: formData,
-                        signal: controller.signal,
-                    })
-                    .then(response => response.json())
-                    .then(responseJson => {
-                        if (responseJson.success) {
-                            console.log('success: True');
-                            console.log(responseJson);
-                        } else {
-                            console.log('success: False');
-                            console.log(responseJson);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
-                    }
-                </script>
-
                 <label for="skin_nombre" class="form-label">Seleccionar Skin:</label>
                 <select class="form-control" id="skin_nombre" name="skin_nombre" required>
                 </select>
             </div>
-
             <div class="mb-3">
                 <label for="price" class="form-label">Precio:</label>
                 <input type="number" class="form-control" id="price" name="price" required>
@@ -102,28 +31,30 @@
 
             <button class="btn btn-primary" type="submit">Publicar</button>
         </form>
+        <script>
+            function hola(){
+                fetch('/show-skins-current')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const skinSelect = document.getElementById('skin_nombre');
+                    const skinNames = data.skin_names;
+
+                    // Populate the <select> element with options
+                    skinNames.forEach(name => {
+                        const option = document.createElement('option');
+                        option.text = name;
+                        skinSelect.add(option);
+                    });
+                }
+            })
+            .catch(error => console.log(error));
+            }
+
+
+        </script>
     </div>
 </div>
-
-
-    // function mensajero(id,campeon){
-    //     var formData = new FormData();
-    //     formData.append('skin_id',id);
-    //     formData.append('campeon',campeon);
-
-    //     fetch('/create-PostVenta',{
-    //         method : 'POST', body: formData,
-    //     }).then(response => response.json())
-    //         .then(data=>{
-    //             if(data.success){
-    //                 return ({'success':true});
-    //             }
-    //             else{
-    //                 return ({'success':false});
-    //             }
-    //         })
-    // }
-
 
 
 
