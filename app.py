@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 import sys
 import os
-from flask_login import login_user,login_required,current_user,LoginManager,UserMixin
+from flask_login import login_user,login_required,current_user,LoginManager,UserMixin, logout_user
 
 app = Flask(__name__)
 login_manager = LoginManager()
@@ -95,7 +95,11 @@ def index():
 def load_user(user_id):
     return User.query.get(user_id)
 
-
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("index"))
 
 @app.route('/register',methods=['GET'])
 def register():
