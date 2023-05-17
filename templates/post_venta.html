@@ -1,108 +1,52 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Make a Post</title>
-    <style>
-        body {
-            background: linear-gradient(to bottom, #FF0000, #000000);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
 
-        .container {
-            width: 500px;
-            height: 400px;
-            background: rgba(255, 255, 255, .3);
-            -webkit-backdrop-filter: blur(5px);
-            backdrop-filter: blur(5px);
-            border: 1.5px solid rgba(209, 213, 219, 0.3);
-            border-radius: 20px;
-        }
-
-        .form-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 0px 30px 0px 10px;
-        }
-
-        .button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #000000;
-            color: #FFFFFF;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            justify-content: center;
-        }
-
-        label {
-            margin-top: 10px;
-            font-weight: bold;
-            color: #000000;
-        }
-
-        input[type="text"],
-        select,
-        input[type="number"] {
-            width: 100%;
-            padding: 8px;
-            border-radius: 5px;
-            border: 1px solid #000000;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="form-container">
-            <h1>Publicación de Skins</h1>
-            <form id="skinForm">
-                <label for="title">Título de la Publicación:</label>
-                <input type="text" id="title" name="title" required>
-
-                <label for="skinSelect">Seleccionar Skin:</label>
-                <select id="skinSelect" name="skinSelect" required>
-                    <!-- Aquí puedes cargar las opciones de skins desde el archivo de usuario -->
+{% extends "base2.html"%}
+{%block title%} post venta{%endblock%}
+{%block stile%}
+{%endblock%}
+{%block body%}
+<div class="container">
+    <div class="form-container">
+        <h1>Publicación de Skins</h1>
+        <form id="skinForm">
+            <div class="mb-3">
+                <label for="title" class="form-label">Título de la Publicación:</label>
+                <input type="text" class="form-control" id="title" name="title" required>
+            </div>
+            <div class="mb-3">
+                <label for="skinSelect" class="form-label">Seleccionar Skin:</label>
+                <select class="form-select" id="skinSelect" name="skinSelect" required>
                     <option value="Skin 1">Skin 1</option>
                     <option value="Skin 2">Skin 2</option>
                     <option value="Skin 3">Skin 3</option>
                 </select>
+            </div>
 
-                <label for="price">Precio:</label>
-                <input type="number" id="price" name="price" required>
+            <div class="mb-3">
+                <label for="price" class="form-label">Precio:</label>
+                <input type="number" class="form-control" id="price" name="price" required>
+            </div>
 
-                <button class="button" type="submit">Publicar</button>
-            </form>
-        </div>
+            <button class="btn btn-primary" type="submit">Publicar</button>
+        </form>
     </div>
+</div>
 
-    <script>
-        const skinForm = document.getElementById('skinForm');
+<script>
+    const skinForm = document.getElementById('skinForm');
 
-        skinForm.addEventListener('submit', function(event) {
-            event.preventDefault();
+    skinForm.addEventListener('submit', function(event) {
+        event.preventDefault();
 
-            const title = document.getElementById('title').value;
-            const selectedSkin = document.getElementById('skinSelect').value;
-            const price = document.getElementById('price').value;
+        const title = document.getElementById('title').value;
+        const selectedSkin = document.getElementById('skinSelect').value;
+        const price = document.getElementById('price').value;
 
-            // Aquí puedes realizar la lógica de publicación de la skin
-            console.log('Título:', title);
-            console.log('Skin seleccionada:', selectedSkin);
-            console.log('Precio:', price);
+        // Aquí puedes realizar la lógica de publicación de la skin
+        console.log('Título:', title);
+        console.log('Skin seleccionada:', selectedSkin);
+        console.log('Precio:', price);
 
-            skinForm.reset();
-        });
-    </script>
-</body>
-</html>
+        skinForm.reset();
+    });
+</script>
+{%endblock%}
