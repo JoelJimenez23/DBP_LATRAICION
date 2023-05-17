@@ -1,4 +1,4 @@
-from flask import Flask,render_template,jsonify,request
+from flask import Flask,render_template,jsonify,request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 import uuid
 from datetime import datetime
@@ -80,8 +80,29 @@ class User(UserMixin,db.Model):
             'image' : self.image,
         }
     
+class Postventa(db.Model):
+    __tablename__ = 'postventa'
+    id = db.Column(db.String(36),primary_key=True,default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
+    user_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
+    user = db.relationship('User', backref=db.backref('postventa', post_update=True))
+    skin_id = db.Column(db.String(36), db.ForeignKey('skins.id'), nullable=False)
+    skin_image = db.Column(db.String(500),nullable=True)
+    skin = db.relationship('Skin', backref=db.backref('postventa', post_update=True))
+    status = db.Column(db.String(100),unique=False,nullable=False)
 
+    def __init__(self,user_id,skin_id,status):
+        self.user_id = user_id
+        self.skin_id = skin_id
+        self.status = status
 
+    def serialize(self):
+        return{
+            'id': self.id,
+            'user_id' : self.user_id,
+            'skin_id': self.skin_id,
+            'status' : self.status,
+            'skin_image' : self.skin_image
+        }
 
 #with app.app_context():db.drop_all()
 with app.app_context():db.create_all()
