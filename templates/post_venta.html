@@ -14,12 +14,42 @@
 
 
             <div class="mb-3">
+                <script>
+                    function loadSkinOptions() {
+                        var skinSelect = document.getElementById('skinSelect');
+
+                        fetch('/show-skins-current')
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    var skins = data.serialized;
+
+                                    // Clear existing options
+                                    skinSelect.innerHTML = "";
+
+                                    // Generate the options for the select element
+                                    for (var i = 0; i < skins.length; i++) {
+                                        var skin = skins[i];
+                                        var option = document.createElement('option');
+                                        option.value = skin.id;
+                                        option.textContent = skin.name;
+                                        skinSelect.appendChild(option);
+                                    }
+                                } else {
+                                    console.error('Error retrieving current skins:', data.error);
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error retrieving current skins:', error);
+                            });
+                    }
+                    document.addEventListener('DOMContentLoaded', function() {
+                        loadSkinOptions();  
+                    })
+                </script>
+
                 <label for="skinSelect" class="form-label">Seleccionar Skin:</label>
                 <select class="form-control" id="skinSelect" name="skinSelect" required>
-                    <!-- Aquí puedes cargar las opciones de skins desde el archivo de usuario -->
-                    <option value="Skin 1">Skin 1</option>
-                    <option value="Skin 2">Skin 2</option>
-                    <option value="Skin 3">Skin 3</option>
                 </select>
             </div>
 
@@ -34,21 +64,43 @@
 </div>
 
 <script>
-    const skinForm = document.getElementById('skinForm');
+    function CreatePost(){
+        const skinForm = document.querySelector('#skinForm',)
+        skinForm.addEventListener('submit', handlingSubmitPost)
+    }   
 
-    skinForm.addEventListener('submit', function(event) {
-        event.preventDefault();
+    function handlingSubmitPost(e){
+        e.preventDefault()
+        e.stopPropagation()
 
-        const title = document.getElementById('title').value;
-        const selectedSkin = document.getElementById('skinSelect').value;
-        const price = document.getElementById('price').value;
+        const skinForm = e.currentTarget
+        const previousController = pendingForms.get(skinForm)
+        if (previousController) {
+        previousController.abort()
+        }
+    
+        const controller = new AbortController()
+        pendingForms.set(skinForm, controller)
 
-        // Aquí puedes realizar la lógica de publicación de la skin
-        console.log('Título:', title);
-        console.log('Skin seleccionada:', selectedSkin);
-        console.log('Precio:', price);
+        //console.log('skinForm: ', skinForm)
+        const formData = new FormData(skinForm)
 
-        skinForm.reset();
-    });
+        const skinSelect =  document.getElementById('skinSelect');
+        const selectedSkinId = skinSelect.value;
+        formData.append('skinId', selectedSkinId);
+
+        fetch('/create-PostVenta',{
+            method: 'POST',
+            body: formData, 
+            signal: controller.signal,
+        }).then((response) => response.json()).then((responseJson)=>{
+            if(responseJson.success){
+                console.log('success: True')
+            }
+            else{
+                console.log('success: False')
+            }
+        })
+    }
 </script>
 {%endblock%}

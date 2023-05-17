@@ -285,14 +285,22 @@ def postventas():
 def create_postventa():
     try:
         if current_user.is_authenticated:
+
+
             title = request.form.get('title')
             user_id = current_user.id
-            nombre = request.form.get('nombre')
-            campeon = request.form.get('campeon')
+            nombre = request.form.get('skinSelect')
+
+            skins_user = Skin.query.filter_by(user_id=current_user.id).all()
+
+
+            campeon_skin = skins_user.query.filter_by(name=nombre).all()
+
+            campeon = campeon_skin.champion_name
             skin_id = request.form.get('skin_id')
             on_sale = True
-            precio = request.form.get('precio')
-
+            precio = request.form.get('price')
+        
             already_skin = Postventa.query.filter_by(skin_id=skin_id).first()
             if already_skin is not None and already_skin.skin_id == skin_id:
                 return jsonify({"success":False,"message":"skin already published"})    
@@ -312,10 +320,6 @@ def create_postventa():
         return jsonify({'success':False,'message':'Error al crear skin'})
     finally:
         db.session.close()
-
-
-
-
 
 @app.route('/user_config',methods=['GET'])
 @login_required
@@ -406,6 +410,21 @@ def showPosts():
         return jsonify({'success':True,"serialized":posts_serialized})
     except Exception as e:
         return jsonify({"success":False})
+
+
+@app.route('/show-skins-current',methods=["GET"])
+@login_required
+def current_skins():
+    try:
+        skins = Skin.query.filter_by(user_id=current_user.id).all()
+
+        skins_serialized = [skin.serialize() for skin in skins]
+        return jsonify({'success':True,'serialized':skins_serialized})
+    except:
+        return jsonify({"success":False})
+
+        
+
 
 
 
