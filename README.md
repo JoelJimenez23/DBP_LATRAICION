@@ -56,4 +56,4 @@ Para la Base de datos de Skinloot, se utilizará lo siguiente:
 - *PostgreSQL*: PostgreSQL es un sistema de gestión de bases de datos relacional de código abierto y gratuito. Se utilizará como la base de datos principal de Skinloot, donde se almacenará toda la información relacionada con los usuarios y las transacciones.
 
 ## Información acerca de los API. Requests and Responses de cada endpoint utilizado en el sistema:
--
+![texto_alternativo](ubicacion_de_la_imagen){width=width height=height}
