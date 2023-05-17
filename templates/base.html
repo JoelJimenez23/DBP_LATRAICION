@@ -18,7 +18,89 @@
     </div>
 </body>
 </html>
+<script>
+    const pendingForms = new WeakMap()
+    
+    function RegisterUser(){
+        const formRegisterUser = document.querySelector('#formRegisterUser',)
+        formRegisterUser.addEventListener('submit',handlingSubmittUser)
+    }
+    function handlingSubmittUser(e){
+        e.preventDefault()
+        e.stopPropagation()
 
+        const formLogin = e.currentTarget
+        const previousController = pendingForms.get(formRegisterUser)
+        if(previousController){
+            previousController.abort()
+        }
+
+        const controller = new AbortController()
+        pendingForms.set(formLogin,controller)
+
+        const formData = new FormData(formRegisterUser)
+
+        fetch('/register-user',{
+            method:"POST",body: formData, signal:controller.signal
+        })
+        .then((response) => response.json())
+        .then((responseJson)=>{
+            if(responseJson.succes){
+                window.location.href = "http://127.0.0.1:5000/market";
+            }
+            else{
+                setTimeout(() => {
+                    formRegisterUser.reset()
+                }, 3000)
+            }
+        })
+    }
+
+
+    function LoginUser(){
+        const formLoginUser = document.querySelector('#formLoginUser',)
+        formLoginUser.addEventListener('submit',handlingSubmittUser)
+    }
+    function handlingSubmittUser(e){
+        e.preventDefault()
+        e.stopPropagation()
+
+        const formLogin = e.currentTarget
+        const previousController = pendingForms.get(formLoginUser)
+        if(previousController){
+            previousController.abort()
+        }
+
+        const controller = new AbortController()
+        pendingForms.set(formLogin,controller)
+
+        const formData = new FormData(formLoginUser)
+
+        fetch('/teoria',{
+            method:"POST",body: formData, signal:controller.signal
+        })
+        .then((response) => response.json())
+        .then((responseJson)=>{
+            if(responseJson.succes){
+                window.location.href = "http://127.0.0.1:5000/market";
+            }
+            else{
+                setTimeout(() => {
+                    formLoginUser.reset()
+                }, 3000)
+            }
+        })
+    }
+
+    function index(ga){
+        if(ga === 1){
+            RegisterUser()
+        }
+        if(ga === 2){
+            LoginUser()
+        }
+    }
+</script>
 <!--<div class="row">
     <div class="col-md-5">
         <div class="logo-container text-center">
