@@ -223,39 +223,24 @@ def showSkins():
         return jsonify({"success":False})
 
 
-# @app.route('/change-saldo',methods=['POST'])
-# @login_required
-# def change_saldo():
-#     try:
-#         dato = request.form.get('new_saldo')
-#         if current_user.is_authenticated:
-#             if current_user.saldo != None:
-#                 current_user.saldo += int(dato)
-#             else:
-#                 current_user.saldo = int(dato)
-#             db.session.commit()
-#             return jsonify({'success':True})
-#         else:
-#             return jsonify({'success':False,'message':"user not authenticated"})
-#     except Exception as e:
-#         return jsonify({'succes':False,"message":'error desconocido'})
-
-@app.route('/change-saldo/<dato>',methods=['GET'])
+@app.route('/change-saldo',methods=['POST'])
 @login_required
-def change_saldo(dato):
-    if current_user.is_authenticated:
-        if current_user.saldo != None:
-            current_user.saldo += int(dato)
+def change_saldo():
+    try:
+        dato = request.form.get('new_saldo')
+        if current_user.is_authenticated:
+            if current_user.saldo != None:
+                current_user.saldo += int(dato)
+            else:
+                current_user.saldo = int(dato)
             db.session.commit()
             return jsonify({'success':True})
         else:
-            current_user.saldo = int(dato)
-            db.session.commit()
-            return jsonify({'success':True})
-    else:
-        return jsonify({'success':False,'message':'User not authenticated'})
+            return jsonify({'success':False,'message':"user not authenticated"})
+    except Exception as e:
+        return jsonify({'succes':False,"message":'error desconocido'})
 
-
+    
 @app.route('/change-nickname',methods=['POST'])
 @login_required
 def change_nickname():
@@ -409,9 +394,6 @@ def buy_skin(post_skin_id):
         db.session.close()
 # Fin de las rutas
 
-@app.route('/hito',methods=['GET'])
-def hito():
-    return render_template('compra_skins.html')
 
 
 @app.route('/comprar-skin',methods=["POST"])
@@ -425,13 +407,13 @@ def comprar_skin():
 
             if current_user.saldo == None or current_user.saldo == 0:
                 return jsonify({'success':False,'message':'wallet = 0'})
-            elif current_user.saldo < int(precio):
+            elif current_user.saldo < precio:
                 return jsonify({'success':False,'message':'insufficient amount of money'})
             else:
-                current_user.saldo -= int(precio)
+                current_user.saldo -= precio
 
                 seller = User.query.filter_by(id=seller_uid).first()
-                seller.saldo += int(precio)
+                seller.saldo += precio
 
                 filename_seller = f'{seller_uid}.txt'
                 filepath_seller = os.path.join(f"{app.config['UPLOAD_FOLDER']}/{seller_uid}",filename_seller)
@@ -439,7 +421,7 @@ def comprar_skin():
                 with open(filepath_seller,'r') as file:
                     contenido = file.readlines()
                 
-                contenido = [linea for linea in contenido if linea.strip() != skin_uid]
+                contenido = [linea for linea in contenido if linea != skin_uid]
                 file.close()
                 
                 with open(filepath_seller,'w') as file:
@@ -450,7 +432,7 @@ def comprar_skin():
                 filepath_user = os.path.join(f"{app.config['UPLOAD_FOLDER']}/{current_user.id}",filename_user)
                 
                 with open(filepath_user,'a') as file:
-                    file.write(str(skin_uid)+'\n')
+                    file.write(str(skin_uid)+'/n')
                 file.close()
                 
                 db.session.commit()
