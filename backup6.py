@@ -28,7 +28,7 @@ class Skin(db.Model):
     rarity = db.Column(db.String(100),unique=False,nullable=False)
     image = db.Column(db.String(500),nullable=True)
     user_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
-    user = db.relationship('User', backref=db.backref('skins', post_update=True))
+
 
     def __init__(self,name,champion_name,rarity,user_id):
         self.name = name
@@ -58,7 +58,7 @@ class User(UserMixin,db.Model):
     password = db.Column(db.String(100),unique=False,nullable=False)
     saldo = db.Column(db.Integer,nullable=True,server_default='0')
     image = db.Column(db.String(500),nullable=True)
-    # skins = db.relationship('Skin',backref='user',lazy=True)
+    skins = db.relationship('Skin',backref='user',lazy=True)
 
 
     def __init__(self,nickname,e_mail,password):
@@ -452,11 +452,6 @@ def comprar_skin():
                 with open(filepath_user,'a') as file:
                     file.write(str(skin_uid)+'\n')
                 file.close()
-
-                #
-
-                skin = Skin.query.filter_by(id=skin_uid).first()
-                skin.user_id = current_user.id
                 
                 db.session.commit()
 
