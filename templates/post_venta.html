@@ -16,7 +16,7 @@
             <div class="mb-3">
                 <script>
                     function loadSkinOptions() {
-                        var skinSelect = document.getElementById('skinSelect');
+                        var skin_id = document.getElementById('skin_id');
 
                         fetch('/show-skins-current')
                             .then(response => response.json())
@@ -25,7 +25,7 @@
                                     var skins = data.serialized;
 
                                     // Clear existing options
-                                    skinSelect.innerHTML = "";
+                                    skin_id.innerHTML = "";
 
                                     // Generate the options for the select element
                                     for (var i = 0; i < skins.length; i++) {
@@ -33,7 +33,7 @@
                                         var option = document.createElement('option');
                                         option.value = skin.id;
                                         option.textContent = skin.name;
-                                        skinSelect.appendChild(option);
+                                        skin_id.appendChild(option);
                                     }
                                 } else {
                                     console.error('Error retrieving current skins:', data.error);
@@ -48,8 +48,8 @@
                     })
                 </script>
 
-                <label for="skinSelect" class="form-label">Seleccionar Skin:</label>
-                <select class="form-control" id="skinSelect" name="skinSelect" required>
+                <label for="skin_id" class="form-label">Seleccionar Skin:</label>
+                <select class="form-control" id="skin_id" name="skin_id" required>
                 </select>
             </div>
 
@@ -85,9 +85,9 @@
         //console.log('skinForm: ', skinForm)
         const formData = new FormData(skinForm)
 
-        const skinSelect =  document.getElementById('skinSelect');
-        const selectedSkinId = skinSelect.value;
-        formData.append('skinId', selectedSkinId);
+        const skin_id =  document.getElementById('skin_id');
+        const selectedSkinId = skin_id.value;
+        formData.append('skin_id', selectedSkinId);
 
         fetch('/create-PostVenta',{
             method: 'POST',

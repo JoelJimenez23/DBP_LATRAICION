@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 import uuid
 from datetime import datetime
 import sys
+from flask_migrate import Migrate
 import os
 from flask_login import login_user,login_required,current_user,LoginManager,UserMixin, logout_user
 
@@ -15,6 +16,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:230204@localhost:
 app.config['UPLOAD_FOLDER'] = 'static/usuarios'
 app.secret_key = 'clave'
 db = SQLAlchemy(app)
+
+# para migraciones
+migrate = Migrate(app,db)
+
 ALLOWED_EXTENSIONS = {'png','jpeg','jpg'}
 
 # Empezamos los modelos: 
@@ -292,11 +297,9 @@ def create_postventa():
             nombre = request.form.get('skinSelect')
 
             skins_user = Skin.query.filter_by(user_id=current_user.id).all()
-
-
             campeon_skin = skins_user.query.filter_by(name=nombre).all()
-
             campeon = campeon_skin.champion_name
+
             skin_id = request.form.get('skin_id')
             on_sale = True
             precio = request.form.get('price')
