@@ -400,8 +400,8 @@ def showSkins():
 @app.route('/show-posts',methods=['GET'])
 def showPosts():
     try:
-        # posts = Postventa.query.filter_by(Postventa.on_sale == True).first()
-        posts = Postventa.query.all()
+        posts = Postventa.query.filter_by(on_sale=True).all()
+        # posts = Postventa.query.all()
         posts_serialized = [post.serialize() for post in posts]
         return jsonify({'success':True,"serialized":posts_serialized})
     except Exception as e:
