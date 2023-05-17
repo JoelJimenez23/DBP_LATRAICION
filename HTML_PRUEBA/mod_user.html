@@ -168,9 +168,9 @@
  <div class="button text-center" data-toggle="modal" data-target="#changeNameModal">
  <h4 class="card-title">Change name</h4>
  </div>
- <div class="button text-center">
- <h4 class="card-title">Change profile picture</h4>
- </div>
+ <div class="button text-center" data-toggle="modal" data-target="#changePictureModal">
+    <h4 class="card-title">Change profile picture</h4>
+    </div>
  <div class="button text-center">
  <h4 class="card-title">Add credits</h4>
  </div>
@@ -252,6 +252,60 @@ alert("Your name has been changed successfully!");
 }
 
 });
+
+</script>
+
+
+<script>
+
+// Get the form element by id
+var form = document.getElementById("changePictureForm");
+
+// Add an event listener for submit event
+form.addEventListener("submit", function(event) {
+
+// Prevent default form submission behavior
+event.preventDefault();
+
+// Get the input element by id
+var input = document.getElementById("newPictureInput");
+
+// Get the file object from input
+var newPicture = input.files[0];
+
+// Check if input is not empty
+if (newPicture) {
+
+// Create a FileReader object
+var reader = new FileReader();
+
+// Add an event listener for load event
+reader.addEventListener("load", function() {
+
+// Get the user-image element by class name
+var userImage = document.getElementsByClassName("user-image")[0];
+
+// Change its src attribute to the result of reader
+userImage.src = reader.result;
+
+// Hide modal
+$('#changePictureModal').modal('hide');
+
+// Clear input value
+input.value = "";
+
+// Show alert message
+alert("Your profile picture has been changed successfully!");
+
+});
+
+// Read the file as a data URL
+reader.readAsDataURL(newPicture);
+
+}
+
+});
+
 
 </script>
 
