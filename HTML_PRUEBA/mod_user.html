@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta charset="UTF-8">
+ <title>Skinloot</title>
+ <!-- Link to Bootstrap 5 CDN -->
+ <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha2/css/bootstrap.min.css">
+ <!-- Link to Google Fonts -->
+ <link rel="preconnect" href="https://fonts.gstatic.com">
+ <link href="https://fonts.googleapis.com/css?family=Inter:700|Space+Mono:400i&display=swap" rel="stylesheet">
+ <!-- Link to Bootstrap Icons -->
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+ <!-- Custom CSS -->
+ <style>
+ /* Set the font family for the whole page */
+ html,body{
+ width: 100%;
+ height: 100%;
+ margin: 0px;
+ padding: 0px;
+ overflow-x: hidden; 
+}
+
+ body {
+ font-family: 'Space Mono', monospace;
+ overflow-x: hidden; /* Prevent horizontal scrolling */
+ }
+ /* Set the background color for the second container */
+ .container-2 {
+ background-color: rgb(22, 21, 21);
+ }
+
+ .big-text4 {
+ font-family: 'Inter', sans-serif;
+ font-weight:500 ; /* Set the font weight to bold */
+ font-size: 4vw; /* Set the size to be smaller than before */
+ background: linear-gradient(to right, rgb(207, 94, 1), rgba(247, 247, 247, 0.428), rgb(162, 13, 13));
+ /* Mask the color to the text and remove the rest */
+ -webkit-background-clip: text;
+ /* Make the text fill color transparent */
+ -webkit-text-fill-color: transparent;
+ margin-top: -10px;
+ }
+
+ .big-text2 {
+ font-family: 'Inter', sans-serif;
+ font-weight: 100; /* Set the font weight to bold */
+ font-size: 3vw; /* Set the size to be smaller than before */
+ color: white;
+ }
+
+/* Set the width and height of the placeholder */
+.placeholder {
+ width: 600px;
+ height: 800px;
+}
+/* Set the border radius and background image of the placeholder */
+.placeholder {
+ border-radius: 20px;
+ background-image: url("gradient.png");
+ background-position: center;
+}
+/* Set some margin and padding for the placeholder */
+.placeholder {
+ margin: auto;
+ padding: 30px;
+}
+
+/* Set the width and height of the user icon */
+.user-icon {
+ width: 150px;
+ height: 150px;
+}
+/* Set the border radius and background color of the user icon */
+.user-icon {
+ border-radius: 50%;
+ background-color: white;
+}
+/* Center the user icon in the placeholder */
+.user-icon {
+ display: block;
+ margin-left: auto;
+ margin-right: auto;
+ margin-bottom: -40px;
+}
+
+/* Set the font family, size and color for the card title */
+.card-title {
+ font-family: 'Inter', sans-serif;
+ font-weight:500; /* Set the font weight to bold */
+ font-size: 20px;
+ color: white;
+}
+
+/* Set the width and height of the button */
+.button {
+ width: 400px;
+ height: 50px;
+}
+/* Set the border radius and background color of the button */
+.button {
+ border-radius: 10px;
+ background-color: black;
+}
+/* Remove some margin and padding from the button */
+.button {
+ margin-bottom: 10px;
+ padding-top: 10px;
+}
+
+/* Center the buttons in the placeholder */
+.button {
+ display: block;
+ margin-left: auto;
+ margin-right: auto;
+}
+
+/* Set the width and height of the user image */
+.user-image {
+ width: 140px;
+ height: 140px;
+}
+/* Set the border radius of the user image */
+.user-image {
+ border-radius: 50%;
+}
+/* Center the user image in the user icon */
+
+.user-image {
+ display: block;
+ position:relative; 
+ top:-110px; 
+ left: 50%;
+ transform: translateX(-50%);
+}
+
+ </style>
+</head>
+
+
+<body> 
+<div class="container-2 py-4">
+ <div class="row mt-5"></div>
+
+ <!-- Create a placeholder with rounded borders and background image -->
+ <div class="placeholder">
+ <!-- Create a user icon from bootstrap -->
+ <i class="bi bi-person-circle user-icon"></i>
+ <!-- Create a user image from user.png -->
+ <img src="user.jpg" alt="User" class="user-image">
+ <!-- Create a text for the name using big-text4 -->
+ <h2 class="big-text4 text-center">John Doe</h2>
+ <!-- Create a title saying "Edit Profile" -->
+ <h1 class="big-text2 text-center">Edit Profile</h1>
+ <!-- Create five buttons with card titles -->
+ <!-- Add a data-toggle and data-target attribute to trigger modal -->
+ <div class="button text-center" data-toggle="modal" data-target="#changeNameModal">
+ <h4 class="card-title">Change name</h4>
+ </div>
+ <div class="button text-center">
+ <h4 class="card-title">Change profile picture</h4>
+ </div>
+ <div class="button text-center">
+ <h4 class="card-title">Add credits</h4>
+ </div>
+ <div class="button text-center">
+ <h4 class="card-title">View skins</h4>
+ </div>
+ <div class="button text-center">
+ <h4 class="card-title">Add skins</h4>
+ </div>
+
+ <!-- Create a modal component for changing name -->
+<div class="modal fade" id="changeNameModal" tabindex="-1" aria-labelledby="changeNameModalLabel" aria-hidden="true">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h5 class="modal-title" id="changeNameModalLabel">Change name</h5>
+<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+<span aria-hidden="true">×</span>
+</button>
+</div>
+<div class="modal-body">
+<!-- Create a form with an input for new name and a button to submit -->
+<form id="changeNameForm">
+<div class="form-group">
+<label for="newNameInput">Enter your new name:</label>
+<input type="text" class="form-control" id="newNameInput" placeholder="John Doe" required>
+</div>
+<button type="submit" class="btn btn-primary mt-3">Submit</button>
+</form>
+</div>
+
+</div>
+</div>
+</div>
+
+ </div>
+
+<!-- Link to jQuery CDN -->
+<script src = "https://code.jquery.com/jquery-3.5.1.slim.min.js"></script> 
+<!-- Link to Bootstrap JS CDN -->
+<script src = "https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha2/js/bootstrap.min.js"></script> 
+
+<!-- Add some custom JS code to handle form submission -->
+<script>
+
+// Get the form element by id
+var form = document.getElementById("changeNameForm");
+
+// Add an event listener for submit event
+form.addEventListener("submit", function(event) {
+
+// Prevent default form submission behavior
+event.preventDefault();
+
+// Get the input element by id
+var input = document.getElementById("newNameInput");
+
+// Get the value of input
+var newName = input.value;
+
+// Check if input is not empty
+if (newName) {
+
+// Get the big-text4 element by class name
+var nameText = document.getElementsByClassName("big-text4")[0];
+
+// Change its innerHTML to new name
+nameText.innerHTML = newName;
+
+// Hide modal
+$('#changeNameModal').modal('hide');
+
+// Clear input value
+input.value = "";
+
+// Show alert message
+alert("Your name has been changed successfully!");
+
+}
+
+});
+
+</script>
+
+</body>
+</html>
+
+
+
+
+
