@@ -11,7 +11,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:1234@localhost:5432/skinloot"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:546362@localhost:5432/skinloot"
 app.config['UPLOAD_FOLDER'] = 'static/usuarios'
 app.secret_key = 'clave'
 db = SQLAlchemy(app)
@@ -79,7 +79,7 @@ class User(UserMixin,db.Model):
             'saldo' : self.saldo,
             'image' : self.image,
         }
-    
+
 class Postventa(db.Model):
     __tablename__ = 'postventa'
     id = db.Column(db.String(36),primary_key=True,default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
@@ -106,6 +106,85 @@ class Postventa(db.Model):
             'status' : self.status,
             'skin_image' : self.skin_image
         }
+
+class Transaccion(db.Model):
+    __tablename__ = 'transacciones'
+
+    id = db.Column(db.String(36), primary_key=True, unique=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
+    fecha_inicio = db.Column(db.DateTime, nullable=False)
+    precio = db.Column(db.Float, nullable=False)
+    comision = db.Column(db.Float, nullable=False)
+    nombre_comprador = db.Column(db.String(100), nullable=False)
+    nombre_vendedor = db.Column(db.String(100), nullable=False)
+    nombre_skin = db.Column(db.String(100), nullable=False)
+    empresa_id = db.Column(db.String(36), db.ForeignKey('empresas.id'), nullable=False)
+
+    def __init__(self, fecha_inicio, precio, comision, nombre_comprador, nombre_vendedor, nombre_skin, empresa_id):
+        self.fecha_inicio = fecha_inicio
+        self.precio = precio
+        self.comision = comision
+        self.nombre_comprador = nombre_comprador
+        self.nombre_vendedor = nombre_vendedor
+        self.nombre_skin = nombre_skin
+        self.empresa_id = empresa_id
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'fecha_inicio': self.fecha_inicio,
+            'precio': self.precio,
+            'comision': self.comision,
+            'nombre_comprador': self.nombre_comprador,
+            'nombre_vendedor': self.nombre_vendedor,
+            'nombre_skin': self.nombre_skin,
+            'empresa_id': self.empresa_id
+        }
+class Trade(db.Model):
+    __tablename__ = 'trades'
+
+    id = db.Column(db.String(36), primary_key=True, unique=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
+    fecha_inicio = db.Column(db.DateTime, nullable=False)
+    nombre_comprador = db.Column(db.String(100), nullable=False)
+    nombre_skin_comprador = db.Column(db.String(100), nullable=False)
+    nombre_vendedor = db.Column(db.String(100), nullable=False)
+    nombre_skin_vendedor = db.Column(db.String(100), nullable=False)
+
+    def __init__(self, fecha_inicio, nombre_comprador, nombre_skin_comprador, nombre_vendedor, nombre_skin_vendedor):
+        self.fecha_inicio = fecha_inicio
+        self.nombre_comprador = nombre_comprador
+        self.nombre_skin_comprador = nombre_skin_comprador
+        self.nombre_vendedor = nombre_vendedor
+        self.nombre_skin_vendedor = nombre_skin_vendedor
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'fecha_inicio': self.fecha_inicio,
+            'nombre_comprador': self.nombre_comprador,
+            'nombre_skin_comprador': self.nombre_skin_comprador,
+            'nombre_vendedor': self.nombre_vendedor,
+            'nombre_skin_vendedor': self.nombre_skin_vendedor
+        }
+class Empresa(db.Model):
+    __tablename__ = 'empresas'
+
+    id = db.Column(db.String(36), primary_key=True, unique=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
+    ganancias = db.Column(db.Float, nullable=False)
+    cantidad_usuarios = db.Column(db.Integer, nullable=False)
+    transacciones = db.relationship('Transaccion', backref='empresa', lazy=True)
+
+    def __init__(self, ganancias, cantidad_usuarios):
+        self.ganancias = ganancias
+        self.cantidad_usuarios = cantidad_usuarios
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'ganancias': self.ganancias,
+            'cantidad_usuarios': self.cantidad_usuarios,
+            'transacciones': [transaccion.serialize() for transaccion in self.transacciones]
+        }
+
 
 #with app.app_context():db.drop_all()
 with app.app_context():db.create_all()
