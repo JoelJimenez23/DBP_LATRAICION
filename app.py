@@ -196,7 +196,7 @@ def index():
 
 @app.route('/s',methods=['GET'])
 def s():
-    return render_template('base2.html')
+    return render_template('mod_user.html')
 
 @login_manager.user_loader
 def load_user(user_id):
