@@ -608,6 +608,9 @@ def comprar_skin():
             skin_uid = request.form.get('skin_on_sale')
             seller_uid = request.form.get('seller_uid')
             precio = request.form.get('precio')
+            post_id = request.form.get('post_id')
+
+            posteo = Postventa.query.filter_by(id=post_id).first()
 
             if current_user.saldo == None or current_user.saldo == 0:
                 return jsonify({'success':False,'message':'wallet = 0'})
@@ -643,6 +646,8 @@ def comprar_skin():
 
                 skin = Skin.query.filter_by(id=skin_uid).first()
                 skin.user_id = current_user.id
+                
+                posteo.on_sale = False
                 
                 db.session.commit()
 

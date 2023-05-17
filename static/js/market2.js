@@ -132,35 +132,128 @@ var currentRow = null;
 // }
 
 
+// function createSkins() {
+//     skinsContainer.innerHTML = "";
+  
+//     // Make an HTTP request to the API
+//     fetch('/show-posts')
+//       .then(response => response.json())
+//       .then(data => {
+//         if (data.success) {
+//           var posts = data.serialized;
+  
+//           // Generate the skins in the frontend
+//           for (var i = 0; i < posts.length; i++) {
+//             var post = posts[i];
+//             var skinBox = document.createElement("div");
+//             skinBox.className = "skin-box";
+//             var skinImage = document.createElement("img");
+//             skinImage.src = post.skin_image;
+//             skinImage.alt = post.nombre;
+  
+//             var skinName = document.createElement("h3");
+//             skinName.textContent = post.nombre;
+  
+//             var skinPrice = document.createElement("p");
+//             skinPrice.textContent = post.precio;
+  
+//             var buyButton = document.createElement("button");
+//             buyButton.className = "buy-button";
+//             buyButton.textContent = "Buy";
+//             buyButton.addEventListener("click", function() {
+//               comprarSkin(post.skin_id, post.user_id, post.precio);
+//             });
+  
+//             skinBox.appendChild(skinImage);
+//             skinBox.appendChild(skinName);
+//             skinBox.appendChild(skinPrice);
+//             skinBox.appendChild(buyButton);
+//             if (i % 3 == 0) {
+//               currentRow = document.createElement("div");
+//               currentRow.className = "row";
+  
+//               skinsContainer.appendChild(currentRow);
+//             }
+  
+//             var column = document.createElement("div");
+//             column.className = "col-md-4";
+  
+//             column.appendChild(skinBox);
+  
+//             currentRow.appendChild(column);
+//           }
+//         } else {
+//           console.error("Error retrieving skins:", data.error);
+//         }
+//       })
+//       .catch(error => {
+//         console.error("Error retrieving skins:", error);
+//       });
+// }
+  
+// function comprarSkin(skinId, sellerId, precio){
+//   var formData = new FormData();
+
+//   console.log("Skin ID:", skinId);
+//   console.log("Seller ID:", sellerId);
+//   console.log("Precio:", precio);
+
+//   formData.append('skin_on_sale',skinId);
+//   formData.append('seller_uid');
+//   formData.append('precio',precio);
+
+//   fetch('/comprar-skin',{
+//     method : 'POST',
+//     body : formData,
+//   }).then(response => response.json())
+//     .then(data => {
+//       if (data.success){
+//         return ({'success':true})
+//       }
+//       else{
+//         console.log('ni preguntas')
+//       }
+//     })
+//     .catch(error => {
+//       console.log("Error comprar skin:",error);
+//       return ({'success':false})
+//     })
+// }
+
+
 function createSkins() {
-    skinsContainer.innerHTML = "";
-  
-    // Make an HTTP request to the API
-    fetch('/show-posts')
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          var posts = data.serialized;
-  
-          // Generate the skins in the frontend
-          for (var i = 0; i < posts.length; i++) {
+  skinsContainer.innerHTML = "";
+
+  // Make an HTTP request to the API
+  fetch('/show-posts')
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        var posts = data.serialized;
+
+        // Generate the skins in the frontend
+        for (var i = 0; i < posts.length; i++) {
+          (function () {
             var post = posts[i];
             var skinBox = document.createElement("div");
             skinBox.className = "skin-box";
             var skinImage = document.createElement("img");
             skinImage.src = post.skin_image;
             skinImage.alt = post.nombre;
-  
+
             var skinName = document.createElement("h3");
             skinName.textContent = post.nombre;
-  
+
             var skinPrice = document.createElement("p");
             skinPrice.textContent = post.precio;
-  
+
             var buyButton = document.createElement("button");
             buyButton.className = "buy-button";
             buyButton.textContent = "Buy";
-  
+            buyButton.addEventListener("click", function () {
+              comprarSkin(post.skin_id, post.user_id, post.precio,post.id);
+            });
+
             skinBox.appendChild(skinImage);
             skinBox.appendChild(skinName);
             skinBox.appendChild(skinPrice);
@@ -168,26 +261,61 @@ function createSkins() {
             if (i % 3 == 0) {
               currentRow = document.createElement("div");
               currentRow.className = "row";
-  
+
               skinsContainer.appendChild(currentRow);
             }
-  
+
             var column = document.createElement("div");
             column.className = "col-md-4";
-  
+
             column.appendChild(skinBox);
-  
+
             currentRow.appendChild(column);
-          }
-        } else {
-          console.error("Error retrieving skins:", data.error);
+          })();
         }
-      })
-      .catch(error => {
-        console.error("Error retrieving skins:", error);
-      });
-  }
-  
+      } else {
+        console.error("Error retrieving skins:", data.error);
+      }
+    })
+    .catch(error => {
+      console.error("Error retrieving skins:", error);
+    });
+}
+
+function comprarSkin(skinId, sellerId, precio,id) {
+  var formData = new FormData();
+
+  console.log("Skin ID:", skinId);
+  console.log("Seller ID:", sellerId);
+  console.log("Precio:", precio);
+  console.log('Post_ID', id);
+
+  formData.append('skin_on_sale', skinId);
+  formData.append('seller_uid', sellerId);
+  formData.append('precio', precio);
+  formData.append('post_id',id)
+
+  fetch('/comprar-skin', {
+    method: 'POST',
+    body: formData,
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        return ({ 'success': true });
+      } else {
+        console.log('ni preguntas');
+      }
+    })
+    .catch(error => {
+      console.log("Error comprar skin:", error);
+      return ({ 'success': false });
+    });
+}
+
+
+
+
 
 // function createSkins() {
 //     skinsContainer.innerHTML = "";
