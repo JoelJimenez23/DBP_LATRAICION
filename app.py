@@ -640,7 +640,7 @@ def comprar_skin():
             transaction = Transaccion(
                 datetime.now(),
                 precio, 
-                0.03 * precio,   # 3% comision 
+                0.1 * precio,   # 10% comision 
                 current_user.nickname,
                 User.query.get(seller_uid).nickname,
                 Skin.query.get(skin_uid).name
