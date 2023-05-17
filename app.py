@@ -204,6 +204,11 @@ def logout():
     logout_user()
     return redirect(url_for("index"))
 
+@app.route('/make_post',methods=['GET'])
+@login_required
+def make_post():
+    return render_template('post_venta.html')
+
 @app.route('/prueba',methods=["GET"])
 def prueba():
     return render_template('skin_register_prueba.html')
