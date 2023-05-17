@@ -205,6 +205,10 @@ with app.app_context():db.create_all()
 def index():
     return render_template('index0.html')
 
+@app.route('/s',methods=['GET'])
+def s():
+    return render_template('mod_user.html')
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(user_id)

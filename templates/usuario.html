@@ -1,49 +1,41 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Configuración de Usuario</title>
-    <style>
-        body {
-            background: linear-gradient(to bottom, #FF0000, #000000);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            padding: 0;
-        }
+{% extends "base2.html"%}
+{%block title%}Configuración de Usuario{%endblock%}
 
-        .container {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            width: 600px;
-            height: 400px;
-            border: 2px solid #070000;
-            border-radius: 15px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
+{% block stile %}
+<style>
+    .container {
+        margin-top: 50px;
+    }
 
-        .button {
-            margin-bottom: 20px;
-            padding: 10px 20px;
-            background-color: #362929;
-            color: #FFFFFF;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Configuración de Usuario</h1>
-        <button class="button">Cambiar Nombre de Usuario</button>
-        <button class="button">Cambiar Foto de Perfil</button>
-        <button class="button">Añadir Saldo</button>
-        <button class="button">Ver Skins</button>
-        <button class="button">Agregar Skins</button>
-    </div>
-</body>
-</html>
+    .button {
+        margin-top: 10px;
+    }
+
+    .form-control {
+        border-radius: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1>Configuración de Usuario</h1>
+    <form>
+        <div class="mb-3">
+            <label for="username" class="form-label">Cambiar Nombre de Usuario</label>
+            <input type="text" class="form-control" id="username" placeholder="Nuevo Nombre de Usuario">
+        </div>
+        <div class="mb-3">
+            <label for="profile-picture" class="form-label">Cambiar Foto de Perfil</label>
+            <input type="file" class="form-control" id="profile-picture">
+        </div>
+        <div class="mb-3">
+            <label for="balance" class="form-label">Añadir Saldo</label>
+            <input type="number" class="form-control" id="balance" placeholder="Cantidad de Saldo">
+        </div>
+        <button type="submit" class="btn btn-primary button">Guardar Cambios</button>
+    </form>
+    <button class="btn btn-secondary button">Ver Skins</button>
+    <button class="btn btn-secondary button">Agregar Skins</button>
+</div>
+{% endblock %}

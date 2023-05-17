@@ -269,4 +269,7 @@ function redirect(index){
     if(index === 1){
       window.location.href = "http://127.0.0.1:5000/make_post";
     }
+    if(index === 2){
+        window.location.href = "http://127.0.0.1:5000/market";
+      }
 }
