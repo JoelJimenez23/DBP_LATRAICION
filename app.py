@@ -12,7 +12,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:1234@localhost:5432/skinloot"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:230204@localhost:5432/skinloot"
 app.config['UPLOAD_FOLDER'] = 'static/usuarios'
 app.secret_key = 'clave'
 db = SQLAlchemy(app)
@@ -285,7 +285,7 @@ def register_skin():
 def postventas():
     return render_template('formVenta.html')
 
-
+##########################################################################################################
 @app.route('/create-PostVenta',methods=['POST'])
 def create_postventa():
     try:
@@ -293,27 +293,36 @@ def create_postventa():
 
 
             title = request.form.get('title')
+            skin_id = request.form.get('skin_id')
+            precio = request.form.get('price')
+
+
             user_id = current_user.id
-            nombre = request.form.get('skinSelect')
+            nombre  = None
+            campeon = None
+
 
             skins_user = Skin.query.filter_by(user_id=current_user.id).all()
-            campeon_skin = skins_user.query.filter_by(name=nombre).all()
-            campeon = campeon_skin.champion_name
+            for skin in skins_user:
+                if skin.id == skin_id:
+                    nombre = skin.name
+                    campeon = skin.champion_name
+                    break
+            
 
-            skin_id = request.form.get('skin_id')
             on_sale = True
-            precio = request.form.get('price')
         
-            already_skin = Postventa.query.filter_by(skin_id=skin_id).first()
-            if already_skin is not None and already_skin.skin_id == skin_id:
-                return jsonify({"success":False,"message":"skin already published"})    
-            else:
-                postventa = Postventa(title,user_id,skin_id,on_sale,precio,nombre,campeon)
-                db.session.add(postventa)
-                db.session.commit()
-                postventa.skin_image = os.path.join("static/campeones",f'{campeon}',f'{nombre}.jpg')
-                db.session.commit()
-                return jsonify({'success':True,'title':title,'user_id':user_id,'nombre':nombre,'campeon':campeon,'skin_id':skin_id,'on_sale':on_sale})
+            already_skin = Postventa.query.filter_by(skin_id=skin_id).filter_by(on_sale=True).first()
+            # if already_skin is not None and already_skin.skin_id == skin_id:
+                # return jsonify({"success":False,"message":"skin already published"})    
+            # else:
+
+            postventa = Postventa(title,user_id,skin_id,on_sale,int(precio),nombre,campeon)
+            db.session.add(postventa)
+            db.session.commit()
+            postventa.skin_image = os.path.join("static/campeones",f'{campeon}',f'{nombre}.jpg')
+            db.session.commit()
+            return jsonify({'success':True,'title':title,'user_id':user_id,'nombre':nombre,'campeon':campeon,'skin_id':skin_id,'on_sale':on_sale})
         else:
             return jsonify({'success':False,'message':'not logged'})
     except Exception as e:
@@ -427,10 +436,6 @@ def current_skins():
         return jsonify({"success":False})
 
         
-
-
-
-
 # @app.route('/change-saldo',methods=['POST'])
 # @login_required
 # def change_saldo():
@@ -554,68 +559,6 @@ def show_current():
     else:
         return jsonify({"succes":False})
     
-
-@app.route('/buy-skin/<post_skin_id>',methods=['POST'])
-def buy_skin(post_skin_id):
-    try:
-        # Get the post_skin record by id
-        post_skin = PostSkin.query.get(post_skin_id)
-        if not post_skin:
-            return jsonify({'success':False,'message':'Post skin not found'})
-
-        # Get the buyer and seller ids from the request
-        buyer_id = request.form.get('buyer_id')
-        seller_id = post_skin.owner_id
-
-        # Get the buyer and seller objects from the database
-        buyer = User.query.get(buyer_id)
-        seller = User.query.get(seller_id)
-
-        if not buyer or not seller:
-            return jsonify({'success':False,'message':'Buyer or seller not found'})
-
-        # Get the skin id and price from the post_skin record
-        skin_id = post_skin.skin_id
-        skin = Skin.query.get(skin_id)
-        if not skin:
-            return jsonify({'success':False,'message':'Skin not found'})
-
-        price = skin.price
-
-        # Check if the buyer has enough balance to pay for the skin
-        if buyer.saldo < price:
-            return jsonify({'success':False,'message':'Insufficient balance'})
-
-        # Create a new transaction record with the buyer_id, seller_id, skin_id and amount
-        transaction = Transaction(buyer_id,seller_id,skin_id,price)
-        db.session.add(transaction)
-
-        # Deduct the amount from the buyer's saldo and add it to the seller's saldo
-        buyer.saldo -= price
-        seller.saldo += price
-
-        # Update the owner_id of the post_skin record to the buyer's id
-        post_skin.owner_id = buyer.id
-
-        # Delete the post_skin record from the table
-        db.session.delete(post_skin)
-
-        # Commit the changes to the database
-        db.session.commit()
-
-        # Return a success message and complete the transaction
-        transaction.status = 'completed'
-        db.session.commit()
-        
-        return jsonify({'success':True,'message':'Transaction completed successfully'})
-    except Exception as e:
-        print(e)
-        print(sys.exc_info())
-        db.session.rollback()
-        return jsonify({'success':False,'message':'Error in completing transaction'})
-    finally:
-        db.session.close()
-# Fin de las rutas
 
 @app.route('/hito',methods=['GET'])
 def hito():
