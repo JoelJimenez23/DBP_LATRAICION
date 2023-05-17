@@ -385,7 +385,16 @@ def teoria():
             login_user(user)
             return redirect('market')
         else:
-            return jsonify({'success':False,'message':"User not registered"})
+            email = request.form.get('e_mail')
+            password = request.form.get('password')
+
+            user = User.query.filter_by(e_mail=email).first()
+            if not user:
+                return redirect(url_for('login'))
+
+            if user.password != password:
+                return redirect(url_for('login'))
+                
     except Exception as e:
         print(e)
         return jsonify({'success': False})
