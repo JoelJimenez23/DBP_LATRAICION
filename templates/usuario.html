@@ -34,8 +34,21 @@
             <input type="number" class="form-control" id="balance" placeholder="Cantidad de Saldo">
         </div>
         <button type="submit" class="btn btn-primary button">Guardar Cambios</button>
+        <a href="/logout" id="logout-link">Cerrar sesión</a>
     </form>
     <button class="btn btn-secondary button">Ver Skins</button>
     <button class="btn btn-secondary button">Agregar Skins</button>
+    <script>
+        $(document).ready(function() {
+      $('#logout-link').click(function(e) {
+        e.preventDefault(); // Evita la acción predeterminada del enlace
+
+        // Realiza una solicitud GET a la ruta de cierre de sesión
+        $.get('/logout', function(response) {
+          window.location.href = '/'; // Redirige al usuario a la página principal
+        });
+      });
+    });
+    </script>
 </div>
 {% endblock %}
