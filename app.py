@@ -86,7 +86,7 @@ class Postventa(db.Model):
     title = db.Column(db.String(100),unique=False,nullable=False)
     user_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
     user = db.relationship('User', backref=db.backref('postventa', post_update=True))
-    skin_id = db.Column(db.String(36), db.ForeignKey('skins.id'), nullable=False)
+    skin_id = db.Column (db.String(36), db.ForeignKey('skins.id'), nullable=False)
     skin_image = db.Column(db.String(500),nullable=True)
     skin = db.relationship('Skin', backref=db.backref('postventa', post_update=True))
     status = db.Column(db.String(100),unique=False,nullable=False)
@@ -204,47 +204,6 @@ def logout():
     logout_user()
     return redirect(url_for("index"))
 
-@app.route('/register',methods=['GET'])
-def register():
-    return render_template('register0.html')
-
-@app.route('/register-user',methods=['POST'])
-def register_user():
-    try:
-        nickname  = request.form.get('nickname')
-        e_mail = request.form.get('e_mail')
-        password = request.form.get('password')
-
-        user = User(nickname,e_mail,password)
-        db.session.add(user)
-        db.session.commit()
-
-        cwd = os.getcwd()
-
-        user_dir = os.path.join(app.config['UPLOAD_FOLDER'],user.id)
-        os.makedirs(user_dir,exist_ok=True)
-        upload_folder = os.path.join(cwd,user_dir)
-
-        # archivo = os.path.join(upload_folder,f'{user.id}.txt')
-        file  = open(f"{user_dir}/{user.id}.txt",'w')
-        file.close()
-        user.skins_hashes = f'{user.id}.txt'
-
-        db.session.commit()
-        image_dir = os.path.join('static/images/persona.png')
-        user.image = image_dir
-        db.session.commit()
-
-        return jsonify({'id':user.id,'succes':True,'message':'User created successfully!'})
-    except Exception as e:
-        print(e)
-        print(sys.exc_info())
-        db.session.rollback()
-        return jsonify({'success':False,'message':'Error al crear el usuario'})
-    finally:
-        db.session.close()
-
-
 @app.route('/prueba',methods=["GET"])
 def prueba():
     return render_template('skin_register_prueba.html')
@@ -294,6 +253,47 @@ def register_skin():
 def user_config():
     return render_template('usuario.html')
 
+@app.route('/register',methods=['GET'])
+def register():
+    return render_template('register0.html')
+
+@app.route('/register-user',methods=['POST'])
+def register_user():
+    try:
+        nickname  = request.form.get('nickname')
+        e_mail = request.form.get('e_mail')
+        password = request.form.get('password')
+
+        user = User(nickname,e_mail,password)
+        db.session.add(user)
+        db.session.commit()
+
+        cwd = os.getcwd()
+
+        user_dir = os.path.join(app.config['UPLOAD_FOLDER'],user.id)
+        os.makedirs(user_dir,exist_ok=True)
+        upload_folder = os.path.join(cwd,user_dir)
+
+        # archivo = os.path.join(upload_folder,f'{user.id}.txt')
+        file  = open(f"{user_dir}/{user.id}.txt",'w')
+        file.close()
+        user.skins_hashes = f'{user.id}.txt'
+
+        db.session.commit()
+        image_dir = os.path.join('static/images/persona.png')
+        user.image = image_dir
+        db.session.commit()
+        login_user(user)
+        return redirect('market')
+    except Exception as e:
+        print(e)
+        print(sys.exc_info())
+        db.session.rollback()
+        return jsonify({'success':False,'message':'Error al crear el usuario'}) #redirect a la pagina que quieras 
+    finally:
+        db.session.close()
+
+
 @app.route('/login',methods=['GET'])
 def login():
     return render_template('login0.html')
@@ -308,7 +308,7 @@ def teoria():
         if user is not None and user.password == password:
             # El usuario con el correo electrónico proporcionado se encontró en la base de datos
             login_user(user)
-            return jsonify({'success': True})
+            return redirect('market')
         else:
             return jsonify({'success':False,'message':"User not registered"})
     except Exception as e:
@@ -579,19 +579,6 @@ def comprar_skin():
 
 
         
-
-#a
-
-        
-
-    
-    
-
-
-
-
-
-
 
 def allowed_file(filename):
     return '.' in filename and \
