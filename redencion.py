@@ -296,11 +296,10 @@ def create_postventa():
             skin_id = request.form.get('skin_id')
             precio = request.form.get('price')
             campeon = request.form.get('campeon')
-            user_id = current_user.id
-            nombre = request.form.get('nombre_skin')
+            nombre = request.form.get('nombre')
 
             
-
+            user_id = current_user.id
             on_sale = True
         
             already_skin = Postventa.query.filter_by(skin_id=skin_id).filter_by(on_sale=True).first()
@@ -309,6 +308,7 @@ def create_postventa():
             # else:
 
             postventa = Postventa(title,user_id,skin_id,on_sale,int(precio),nombre,campeon)
+            
             db.session.add(postventa)
             db.session.commit()
             postventa.skin_image = os.path.join("static/campeones",f'{campeon}',f'{nombre}.jpg')
@@ -414,7 +414,7 @@ def showPosts():
     except Exception as e:
         return jsonify({"success":False})
 
-
+########################################################################################################################
 @app.route('/show-skins-current',methods=["GET"])
 @login_required
 def current_skins():
@@ -422,7 +422,7 @@ def current_skins():
         skins = Skin.query.filter_by(user_id=current_user.id).all()
 
         skins_serialized = [skin.serialize() for skin in skins]
-        return jsonify({'success':True,'serialized':skins_serialized})
+        return jsonify({'success':True,'skins':skins_serialized}),200
     except:
         return jsonify({"success":False})
 

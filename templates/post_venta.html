@@ -4,14 +4,26 @@
 {% block title %}Post de venta{% endblock %}
 {%block body%}
 <div class="container">
-    
+    <script>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
-<script>
-
-
-</script>
+        function hola() {
+            console.log("primero");
+            const skin_nombre = document.getElementById('skin_nombre');
+            skin_nombre.innerHTML = '';
+            fetch('/show-skins-current')
+                .then((response) => response.json())
+                .then((responseJson) => {
+                    const skins = responseJson.skins; // Accede a los skins usando responseJson['skins']
+                    skins.forEach((skin) => {
+                        const option = document.createElement('option');
+                        option.value = skin.id;
+                        option.innerHTML = skin.nombre;
+                        skin_nombre.appendChild(option);
+                    });
+                });
+        }
+        hola();
+    </script>
     <div class="form-container">
         <h1>Publicación de Skins</h1>
         <form id="skinForm">
@@ -31,29 +43,9 @@
 
             <button class="btn btn-primary" type="submit">Publicar</button>
         </form>
-        <script>
-            function hola(){
-                fetch('/show-skins-current')
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const skinSelect = document.getElementById('skin_nombre');
-                    const skinNames = data.skin_names;
-
-                    // Populate the <select> element with options
-                    skinNames.forEach(name => {
-                        const option = document.createElement('option');
-                        option.text = name;
-                        skinSelect.add(option);
-                    });
-                }
-            })
-            .catch(error => console.log(error));
-            }
-
-
-        </script>
     </div>
+
+
 </div>
 
 
