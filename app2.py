@@ -566,7 +566,7 @@ def hito():
     return render_template('compra_skins.html')
 
 
-@app.route('/comprar-skin',methods=["POST"])
+@app.route('/comprar-skin', methods=["POST"])
 @login_required
 def comprar_skin():        
     try:
@@ -574,31 +574,46 @@ def comprar_skin():
             skin_uid = request.form.get('skin_on_sale')
             seller_uid = request.form.get('seller_uid')
             precio = request.form.get('precio')
+            
+            if current_user.saldo == None or current_user.saldo == 0:
+                return jsonify({'success': False, 'message': 'wallet = 0'})
+            elif current_user.saldo < int(precio):
+                return jsonify({'success': False, 'message': 'insufficient amount of money'})
+            else:
+                current_user.saldo -= int(precio)
+                seller = User.query.filter_by(id=seller_uid).first()
+                seller.saldo += int(precio)
 
-        if current_user.saldo == None or current_user.saldo == 0:
-            return jsonify({'success':False,'message':'wallet = 0'})
-        elif current_user.saldo < int(precio):
-            return jsonify({'success':False,'message':'insufficient amount of money'})
+                filename_seller = f'{seller_uid}.txt'
+                filepath_seller = os.path.join(f"{app.config['UPLOAD_FOLDER']}/{seller_uid}", filename_seller)
+
+                with open(filepath_seller, 'r') as file:
+                    contenido = file.readlines()
+
+                contenido = [linea for linea in contenido if linea.strip() != skin_uid]
+                file.close()
+
+                with open(filepath_seller, 'w') as file:
+                    file.writelines(contenido)
+                file.close()
+
+                filename_user = f'{current_user.id}.txt'
+                filepath_user = os.path.join(f"{app.config['UPLOAD_FOLDER']}/{current_user.id}", filename_user)
+
+                with open(filepath_user, 'a') as file:
+                    file.write(str(skin_uid) + '\n')
+                file.close()
+
+                skin = Skin.query.filter_by(id=skin_uid).first()
+                skin.user_id = current_user.id
+
+                db.session.commit()
+
+                return jsonify({'success': True, 'current_user': current_user.id, 'seller': seller.id, 'skin_id': skin_uid, 'precio': precio})
         else:
-            # Create Transaccion object
-            transaction = Transaccion(
-                datetime.now(),
-                precio, 
-                0.1 * precio,   # 10% comision 
-                current_user.nickname,
-                User.query.get(seller_uid).nickname,
-                Skin.query.get(skin_uid).name
-            )
-            db.session.add(transaction)
-
-            current_user.saldo -= int(precio)
-            ...
-
-            db.session.commit()
-
-            return jsonify({'success':True, 'message':'Skin bought successfully'})
-    except:
-        return jsonify({'success':False,'message':'user not authenticated'})
+            return jsonify({'success': False, 'message': 'user not authenticated'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': 'unknown error'})
 
 
         
