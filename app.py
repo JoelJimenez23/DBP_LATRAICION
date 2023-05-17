@@ -123,7 +123,7 @@ def load_user(user_id):
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for("index"))
+    return redirect(url_for("index0.html"))
 
 @app.route('/register',methods=['GET'])
 def register():
