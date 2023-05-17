@@ -34,8 +34,8 @@
                                         option.value = skin.name;
                                         option.textContent = skin.name;
                                         skin_nombre.appendChild(option);
-                                        option.addEventListener(function(){
-                                            mensajero(skin.id,skin.campeon);
+                                        option.addEventListener('click', function() {
+                                            mensajero(skin.id, skin.campeon);
                                         });
                                     }
                                 } else {
@@ -45,10 +45,49 @@
                             .catch(error => {
                                 console.error('Error retrieving current skins:', error);
                             });
+                    }          
+
+
+                                    
+                    function CreatePost(){
+                        const skinForm = document.querySelector('#skinForm',)
+                        skinForm.addEventListener('submit', handlingSubmitPost)
+                    }   
+
+                    function handlingSubmitPost(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const skinForm = e.currentTarget;
+                    const previousController = pendingForms.get(skinForm);
+                    if (previousController) {
+                        previousController.abort();
                     }
-                    document.addEventListener('DOMContentLoaded', function() {
-                        loadSkinOptions();  
+
+                    const controller = new AbortController();
+                    pendingForms.set(skinForm, controller);
+
+                    const formData = new FormData(skinForm);
+
+                    fetch('/create-PostVenta', {
+                        method: 'POST',
+                        body: formData,
+                        signal: controller.signal,
                     })
+                    .then(response => response.json())
+                    .then(responseJson => {
+                        if (responseJson.success) {
+                            console.log('success: True');
+                            console.log(responseJson);
+                        } else {
+                            console.log('success: False');
+                            console.log(responseJson);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                    }
                 </script>
 
                 <label for="skin_nombre" class="form-label">Seleccionar Skin:</label>
@@ -66,69 +105,27 @@
     </div>
 </div>
 
-<script>
 
-    function mensajero(id,campeon){
-        var formData = new FormData();
-        formData.append('skin_id',id);
-        formData.append('campeon',campeon);
+    // function mensajero(id,campeon){
+    //     var formData = new FormData();
+    //     formData.append('skin_id',id);
+    //     formData.append('campeon',campeon);
 
-        fetch('/create-PostVenta',{
-            method : 'POST', body: formData,
-        }).then(response => response.json())
-            .then(data=>{
-                if(data.success){
-                    return ({'success':true});
-                }
-                else{
-                    return ({'success':false});
-                }
-            })
-    }
-
+    //     fetch('/create-PostVenta',{
+    //         method : 'POST', body: formData,
+    //     }).then(response => response.json())
+    //         .then(data=>{
+    //             if(data.success){
+    //                 return ({'success':true});
+    //             }
+    //             else{
+    //                 return ({'success':false});
+    //             }
+    //         })
+    // }
 
 
 
 
-    function CreatePost(){
-        const skinForm = document.querySelector('#skinForm',)
-        skinForm.addEventListener('submit', handlingSubmitPost)
-    }   
 
-    function handlingSubmitPost(e){
-        e.preventDefault()
-        e.stopPropagation()
-
-        const skinForm = e.currentTarget
-        const previousController = pendingForms.get(skinForm)
-        if (previousController) {
-        previousController.abort()
-        }
-    
-        const controller = new AbortController()
-        pendingForms.set(skinForm, controller)
-
-        //console.log('skinForm: ', skinForm)
-        const formData = new FormData(skinForm)
-
-        // const skin_id =  document.getElementById('skin_id');
-        // const selectedSkinId = skin_id.value;
-        // formData.append('skin_id', selectedSkinId);
-
-        fetch('/create-PostVenta',{
-            method: 'POST',
-            body: formData, 
-            signal: controller.signal,
-        }).then((response) => response.json()).then((responseJson)=>{
-            if(responseJson.success){
-                console.log('success: True')
-                print('true')
-            }
-            else{
-                console.log('success: False')
-                print('false')
-            }
-        })
-    }
-</script>
 {%endblock%}
