@@ -1,9 +1,37 @@
+<<<<<<< Updated upstream
 
 {% extends "base2.html"%}
 {%block title%} post venta{%endblock%}
 {%block stile%}
 {%endblock%}
 {%block body%}
+=======
+{% extends "base2.html" %}
+{% block title %}Post de venta{% endblock %}
+
+{% block stile %}
+<style>
+    .container {
+        margin-top: 50px;
+    }
+
+    .button {
+        margin-top: 10px;
+    }
+
+    .form-control {
+        border-radius: 10px;
+    }
+
+    .form-container {
+        width: 400px;
+        margin: 0 auto;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+>>>>>>> Stashed changes
 <div class="container">
     <div class="form-container">
         <h1>Publicación de Skins</h1>
@@ -12,9 +40,17 @@
                 <label for="title" class="form-label">Título de la Publicación:</label>
                 <input type="text" class="form-control" id="title" name="title" required>
             </div>
+<<<<<<< Updated upstream
             <div class="mb-3">
                 <label for="skinSelect" class="form-label">Seleccionar Skin:</label>
                 <select class="form-select" id="skinSelect" name="skinSelect" required>
+=======
+
+            <div class="mb-3">
+                <label for="skinSelect" class="form-label">Seleccionar Skin:</label>
+                <select class="form-control" id="skinSelect" name="skinSelect" required>
+                    <!-- Aquí puedes cargar las opciones de skins desde el archivo de usuario -->
+>>>>>>> Stashed changes
                     <option value="Skin 1">Skin 1</option>
                     <option value="Skin 2">Skin 2</option>
                     <option value="Skin 3">Skin 3</option>
@@ -26,6 +62,7 @@
                 <input type="number" class="form-control" id="price" name="price" required>
             </div>
 
+<<<<<<< Updated upstream
             <button class="btn btn-primary" type="submit">Publicar</button>
         </form>
     </div>
@@ -50,3 +87,28 @@
     });
 </script>
 {%endblock%}
+=======
+            <button class="btn btn-primary button" type="submit">Publicar</button>
+        </form>
+    </div>
+</div>
+<script>
+    const skinForm = document.getElementById('skinForm');
+
+    skinForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const title = document.getElementById('title').value;
+        const selectedSkin = document.getElementById('skinSelect').value;
+        const price = document.getElementById('price').value;
+
+        // Aquí puedes realizar la lógica de publicación de la skin
+        console.log('Título:', title);
+        console.log('Skin seleccionada:', selectedSkin);
+        console.log('Precio:', price);
+
+        skinForm.reset();
+    });
+</script>
+{% endblock %}
+>>>>>>> Stashed changes
