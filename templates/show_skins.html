@@ -1,0 +1,110 @@
+{% extends "base2.html"%}
+{%block title%} market {%endblock%}
+{%block stile%}
+{%endblock%}
+{%block body%}
+<div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <h1 class="text-center">Search Skins</h1>
+        <div class="input-group mb-3">
+          <input type="text" class="form-control custom-input-group" placeholder="Search...">
+          <button class="btn btn-outline-danger" type="button">Search</button>
+        </div>
+        <div class="filter-box">
+          <div class="row">
+            <!-- Modified part -->
+            <!-- Add a new column for the price order filter -->
+            <div class="col-md-4">
+              <label for="price-order-filter" class="form-label">Price Order:</label>
+              <select class="form-select custom-input-group" id="price-order-filter" onchange="sortSkins()">
+                <!-- Add two options for the price order filter -->
+                <option value="">None</option>
+                <option value="desc">Most Expensive to Cheapest</option>
+                <option value="asc">Cheapest to Most Expensive</option>
+              </select>
+            </div>
+            <!-- End of modified part -->
+            <div class="col-md-4">
+              <label for="rarity-filter" class="form-label">Rarity:</label>
+              <select class="form-select custom-input-group" id="rarity-filter">
+                <option value="">All</option>
+                <option value="common">Common</option>
+                <option value="rare">Rare</option>
+                <option value="epic">Epic</option>
+                <option value="legendary">Legendary</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label for="game-filter" class="form-label">Game:</label>
+              <select class="form-select custom-input-group" id="game-filter">
+                <option value="">All</option>
+                <option value="game1">Game 1</option>
+                <option value="game2">Game 2</option>
+                <option value="game3">Game 3</option>
+              </select>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Create a div with id "skins-container" to hold the skin boxes -->
+        <div>
+            <div id="show-skins"></div>
+            <script>
+                var showSkinsElement = document.getElementById("show-skins");
+
+            function showSkins() {
+            showSkinsElement.innerHTML = "";
+            fetch('/show-skins-current')
+                .then(response => response.json())
+                .then(data => {
+                if (data.success) {
+                    var skins = data.serialized;
+                    var currentRow;
+
+                    // Generate the skins in the frontend
+                    for (var i = 0; i < skins.length; i++) {
+                    var skin = skins[i];
+
+                    var skinBox = document.createElement("div");
+                    skinBox.className = "skin-box";
+
+                    var skinImage = document.createElement("img");
+                    skinImage.src = skin.image;
+                    skinImage.alt = skin.name;
+
+                    var skinName = document.createElement("h3");
+                    skinName.textContent = skin.name;
+
+                    skinBox.appendChild(skinImage);
+                    skinBox.appendChild(skinName);
+
+                    if (i % 3 === 0) {
+                        currentRow = document.createElement("div");
+                        currentRow.className = "row";
+                        showSkinsElement.appendChild(currentRow);
+                    }
+
+                    var column = document.createElement("div");
+                    column.className = "col-md-4";
+                    column.appendChild(skinBox);
+
+                    currentRow.appendChild(column);
+                    }
+                } else {
+                    console.error("Error retrieving skins:", data.error);
+                }
+                })
+                .catch(error => {
+                console.error("Error retrieving skins:", error);
+                });
+            }
+
+            // Call the showSkins function to display the skins
+            showSkins();
+
+            </script>
+        </div>
+  </div>
+</div>
+{%endblock%}

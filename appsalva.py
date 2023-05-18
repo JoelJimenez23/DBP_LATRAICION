@@ -207,9 +207,17 @@ class Empresa(db.Model):
 with app.app_context():db.create_all()
 # Empezamos las rutas:
 
+
+
 @app.route('/',methods=['GET'])
 def index():
     return render_template('index0.html')
+
+
+@app.route('/show_s',methods=['GET'])
+def show_s():
+    return render_template('show_skins.html')
+
 
 @app.route('/s',methods=['GET'])
 def s():
@@ -245,14 +253,8 @@ def register_skin():
             user_id = current_user.id
 
             skin = Skin(name,champion_name,rarity,user_id)
-            
-            db.session.add(skin)
-            db.session.commit()
 
             uid = skin.id
-            # direc = open(f"{app.config['UPLOAD_FOLDER']}/{current_user.id}",f"{current_user.id}.txt")
-            # inputfile = open(direc,"a")
-            # inputfile.write(str(uid) + '\n')
 
             filename = f'{current_user.id}.txt'
             filepath = os.path.join(f"{app.config['UPLOAD_FOLDER']}/{current_user.id}",filename)
@@ -260,9 +262,13 @@ def register_skin():
             with open(filepath,'a') as file:
                 file.write(str(uid) + '\n')
             file.close()
+            
+            skin.image = os.path.join("static/campeones",f'{champion_name}',f'{name}.jpg')
 
             db.session.commit()
             
+            db.session.add(skin)
+            db.session.commit()
             return jsonify({'skin_id':skin.id,'user_id':current_user.id,"message":"Skin agregada"})
         else:
             return jsonify({"message" : "current user not authorized"})
@@ -626,6 +632,63 @@ def comprar_skin():
             return jsonify({'success':True, 'message':'Skin bought successfully'})
     except:
         return jsonify({'success':False,'message':'user not authenticated'})
+
+@app.route('/comprar-skin',methods=["POST"])
+@login_required
+def trade_skin():        
+    try:
+        if current_user.is_authenticated:
+            skin_uid = request.form.get('skin_on_sale')
+            seller_uid = request.form.get('seller_uid')
+            precio = request.form.get('precio')
+            post_id = request.form.get('post_id')
+
+            posteo = Postventa.query.filter_by(id=post_id).first()
+
+            if current_user.saldo == None or current_user.saldo == 0:
+                return jsonify({'success':False,'message':'wallet = 0'})
+            elif current_user.saldo < int(precio):
+                return jsonify({'success':False,'message':'insufficient amount of money'})
+            else:
+                current_user.saldo -= int(precio)
+
+                seller = User.query.filter_by(id=seller_uid).first()
+                seller.saldo += int(precio)
+
+                filename_seller = f'{seller_uid}.txt'
+                filepath_seller = os.path.join(f"{app.config['UPLOAD_FOLDER']}/{seller_uid}",filename_seller)
+
+                with open(filepath_seller,'r') as file:
+                    contenido = file.readlines()
+                
+                contenido = [linea for linea in contenido if linea.strip() != skin_uid]
+                file.close()
+                
+                with open(filepath_seller,'w') as file:
+                    file.writelines(contenido)
+                file.close()
+                
+                filename_user = f'{current_user.id}.txt'
+                filepath_user = os.path.join(f"{app.config['UPLOAD_FOLDER']}/{current_user.id}",filename_user)
+                
+                with open(filepath_user,'a') as file:
+                    file.write(str(skin_uid)+'\n')
+                file.close()
+
+                #
+
+                skin = Skin.query.filter_by(id=skin_uid).first()
+                skin.user_id = current_user.id
+                
+                posteo.on_sale = False
+                
+                db.session.commit()
+
+                return jsonify({'success':True,'current_user':current_user.id,'seller':seller.id,'skin_id':skin_uid,'precio':precio})
+        else:
+            return jsonify({'success':False,'message':'user not authenticated'})
+    except Exception as e:
+        return jsonify({'success':False,'message':'error desconocido'})
 
 
         

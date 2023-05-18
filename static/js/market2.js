@@ -31,7 +31,7 @@ var skins = [
     }
     ];
 var skinsContainer = document.getElementById("skins-container");
-
+var show_skins = document.getElementById("show-skins");
 var currentRow = null;
 
 // function createSkins() {
@@ -223,14 +223,12 @@ var currentRow = null;
 
 function createSkins() {
   skinsContainer.innerHTML = "";
-
   // Make an HTTP request to the API
   fetch('/show-posts')
     .then(response => response.json())
     .then(data => {
       if (data.success) {
         var posts = data.serialized;
-
         // Generate the skins in the frontend
         for (var i = 0; i < posts.length; i++) {
           (function () {
@@ -313,7 +311,55 @@ function comprarSkin(skinId, sellerId, precio,id) {
     });
 }
 
+function show_skins() {
+  show_skins.innerHTML = "";
+  // Make an HTTP request to the API
+  fetch('/show-skins-current')
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        var posts = data.skins;
+        // Generate the skins in the frontend
+        for (var i = 0; i < posts.length; i++) {
+          (function () {
+            var post = posts[i];
+            var skinBox = document.createElement("div");
+            skinBox.className = "skin-box";
+            var skinImage = document.createElement("img");
+            skinImage.src = post.image;
+            skinImage.alt = post.name;
 
+            var skinName = document.createElement("h3");
+            skinName.textContent = post.name;
+
+
+            skinBox.appendChild(skinImage);
+            skinBox.appendChild(skinName);
+            skinBox.appendChild(skinPrice);
+            skinBox.appendChild(buyButton);
+            if (i % 3 == 0) {
+              currentRow = document.createElement("div");
+              currentRow.className = "row";
+
+              skinsContainer.appendChild(currentRow);
+            }
+
+            var column = document.createElement("div");
+            column.className = "col-md-4";
+
+            column.appendChild(skinBox);
+
+            currentRow.appendChild(column);
+          })();
+        }
+      } else {
+        console.error("Error retrieving skins:", data.error);
+      }
+    })
+    .catch(error => {
+      console.error("Error retrieving skins:", error);
+    });
+}
 
 
 
