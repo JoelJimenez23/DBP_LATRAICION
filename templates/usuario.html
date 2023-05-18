@@ -35,18 +35,18 @@
 {% block body %}
 <div class="container">
     <h1>Configuración de Usuario</h1>
-    <form>
+    <form id="user-settings-form" action="/update-user" method="POST">
         <div class="mb-3">
             <label for="username" class="form-label">Cambiar Nombre de Usuario</label>
-            <input type="text" class="form-control" id="username" placeholder="Nuevo Nombre de Usuario">
+            <input type="text" class="form-control" id="username" name = "username" placeholder="Nuevo Nombre de Usuario">
         </div>
         <div class="mb-3">
             <label for="profile-picture" class="form-label">Cambiar Foto de Perfil</label>
-            <input type="file" class="form-control" id="profile-picture">
+            <input type="file" class="form-control" id="profile-picture" name="profile-picture">
         </div>
         <div class="mb-3">
             <label for="balance" class="form-label">Añadir Saldo</label>
-            <input type="number" class="form-control" id="balance" placeholder="Cantidad de Saldo">
+            <input type="number" class="form-control" id="balance" name="balance" placeholder="Cantidad de Saldo">
         </div>
         <button type="submit" class="btn btn-primary button">Guardar Cambios</button>
         <a href="/logout" id="logout-link" class="button">Cerrar sesión</a>

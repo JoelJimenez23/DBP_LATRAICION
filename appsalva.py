@@ -379,14 +379,20 @@ def update_user():
 
         # Actualizar los datos del usuario en la base de datos
         if current_user.is_authenticated:
-            current_user.nickname = username
-            if profile_picture:
-                profile_picture.save('profile_picture.jpg')
-            current_user.saldo = balance
+            if username != "":
+                current_user.nickname = username
+                #db.session.commit()
+            if profile_picture:profile_picture.save('profile_picture.jpg')
+            #db.session.commit()
 
+
+            if current_user.saldo != None:
+                current_user.saldo += int(balance)
+                #db.session.commit()
+            else:
+                current_user.saldo = balance
             db.session.commit()
-
-            return jsonify({'success': True, 'message': 'User data updated successfully'})
+            return redirect('market')
         else:
             return jsonify({'success': False, 'message': 'User not authenticated'})
     except Exception as e:
@@ -396,6 +402,21 @@ def update_user():
         return jsonify({'success': False, 'message': 'Error updating user data'})
     finally:
         db.session.close()
+
+@app.route('/change-saldo/<dato>',methods=['GET'])
+@login_required
+def change_saldo(dato):
+    if current_user.is_authenticated:
+        if current_user.saldo != None:
+            current_user.saldo += int(dato)
+            db.session.commit()
+            return jsonify({'success':True})
+        else:
+            current_user.saldo = int(dato)
+            db.session.commit()
+            return jsonify({'success':True})
+    else:
+        return jsonify({'success':False,'message':'User not authenticated'})
 
 
 @app.route('/user_config',methods=['GET'])
@@ -518,20 +539,6 @@ def current_skins():
 #     except Exception as e:
 #         return jsonify({'succes':False,"message":'error desconocido'})
 
-@app.route('/change-saldo/<dato>',methods=['GET'])
-@login_required
-def change_saldo(dato):
-    if current_user.is_authenticated:
-        if current_user.saldo != None:
-            current_user.saldo += int(dato)
-            db.session.commit()
-            return jsonify({'success':True})
-        else:
-            current_user.saldo = int(dato)
-            db.session.commit()
-            return jsonify({'success':True})
-    else:
-        return jsonify({'success':False,'message':'User not authenticated'})
 
 
 @app.route('/change-nickname', methods=['POST'])
