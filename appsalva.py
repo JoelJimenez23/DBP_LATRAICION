@@ -324,50 +324,6 @@ def create_postventa():
         return jsonify({'success':False,'message':'Error al crear skin'})
     finally:
         db.session.close()
-    try:
-        if current_user.is_authenticated:
-
-
-            title = request.form.get('title')
-            skin_id = request.form.get('skin_id')
-            precio = request.form.get('price')
-
-
-            user_id = current_user.id
-            nombre  = None
-            campeon = None
-
-
-            skins_user = Skin.query.filter_by(user_id=current_user.id).all()
-            for skin in skins_user:
-                if skin.id == skin_id:
-                    nombre = skin.name
-                    campeon = skin.champion_name
-                    break
-            
-
-            on_sale = True
-        
-            already_skin = Postventa.query.filter_by(skin_id=skin_id).filter_by(on_sale=True).first()
-            # if already_skin is not None and already_skin.skin_id == skin_id:
-                # return jsonify({"success":False,"message":"skin already published"})    
-            # else:
-
-            postventa = Postventa(title,user_id,skin_id,on_sale,int(precio),nombre,campeon)
-            db.session.add(postventa)
-            db.session.commit()
-            postventa.skin_image = os.path.join("static/campeones",f'{campeon}',f'{nombre}.jpg')
-            db.session.commit()
-            return jsonify({'success':True,'title':title,'user_id':user_id,'nombre':nombre,'campeon':campeon,'skin_id':skin_id,'on_sale':on_sale})
-        else:
-            return jsonify({'success':False,'message':'not logged'})
-    except Exception as e:
-        print(e)
-        print(sys.exc_info())
-        db.session.rollback()
-        return jsonify({'success':False,'message':'Error al crear skin'})
-    finally:
-        db.session.close()
 
 @app.route('/update-user', methods=['POST'])
 def update_user():
@@ -379,18 +335,18 @@ def update_user():
 
         # Actualizar los datos del usuario en la base de datos
         if current_user.is_authenticated:
-            if username != "":
-                current_user.nickname = username
-                #db.session.commit()
-            if profile_picture:profile_picture.save('profile_picture.jpg')
-            #db.session.commit()
+            if username != "" or balance != "" or profile_picture:
+                if username != "":
+                    current_user.nickname = username
 
+                if balance != "":
+                    if current_user.saldo is not None:
+                        current_user.saldo += int(balance)
+                    else:
+                        current_user.saldo = int(balance)
+                if profile_picture is not None:
+                    profile_picture.save('profile_picture.jpg')
 
-            if current_user.saldo != None:
-                current_user.saldo += int(balance)
-                #db.session.commit()
-            else:
-                current_user.saldo = balance
             db.session.commit()
             return redirect('market')
         else:
