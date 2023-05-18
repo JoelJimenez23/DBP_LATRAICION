@@ -127,34 +127,31 @@ class Transaccion(db.Model):
     __tablename__ = 'transacciones'
 
     id = db.Column(db.String(36), primary_key=True, unique=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
-    fecha_inicio = db.Column(db.DateTime, nullable=False)
+    fecha = db.Column(db.DateTime(timezone=True), nullable=False, server_default=db.text("now()"))
     precio = db.Column(db.Float, nullable=False)
     comision = db.Column(db.Float, nullable=False)
-    nombre_comprador = db.Column(db.String(100), nullable=False)
-    nombre_vendedor = db.Column(db.String(100), nullable=False)
-    nombre_skin = db.Column(db.String(100), nullable=False)
-    empresa_id = db.Column(db.String(36), db.ForeignKey('empresas.id'), nullable=False)
+    id_comprador = db.Column(db.String(36), nullable=False)
+    id_vendedor = db.Column(db.String(100), nullable=False)
+    id_skin = db.Column(db.String(100), nullable=False)
 
-    def __init__(self, fecha_inicio, precio, comision, nombre_comprador, nombre_vendedor, nombre_skin, empresa_id):
-        self.fecha_inicio = fecha_inicio
+    def __init__(self,precio, comision, id_comprador, id_vendedor, id_skin):
         self.precio = precio
         self.comision = comision
-        self.nombre_comprador = nombre_comprador
-        self.nombre_vendedor = nombre_vendedor
-        self.nombre_skin = nombre_skin
-        self.empresa_id = empresa_id
+        self.id_comprador = id_comprador
+        self.id_vendedor = id_vendedor
+        self.id_skin = id_skin
 
     def serialize(self):
         return {
             'id': self.id,
-            'fecha_inicio': self.fecha_inicio,
+            'fecha': self.fecha,
             'precio': self.precio,
             'comision': self.comision,
-            'nombre_comprador': self.nombre_comprador,
-            'nombre_vendedor': self.nombre_vendedor,
-            'nombre_skin': self.nombre_skin,
-            'empresa_id': self.empresa_id
+            'id_comprador': self.id_comprador,
+            'id_vendedor': self.id_vendedor,
+            'id_skin': self.id_skin,
         }
+    
 class Trade(db.Model):
     __tablename__ = 'trades'
 
@@ -181,25 +178,7 @@ class Trade(db.Model):
             'nombre_vendedor': self.nombre_vendedor,
             'nombre_skin_vendedor': self.nombre_skin_vendedor
         }
-class Empresa(db.Model):
-    __tablename__ = 'empresas'
 
-    id = db.Column(db.String(36), primary_key=True, unique=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
-    ganancias = db.Column(db.Float, nullable=False)
-    cantidad_usuarios = db.Column(db.Integer, nullable=False)
-    transacciones = db.relationship('Transaccion', backref='empresa', lazy=True)
-
-    def __init__(self, ganancias, cantidad_usuarios):
-        self.ganancias = ganancias
-        self.cantidad_usuarios = cantidad_usuarios
-
-    def serialize(self):
-        return {
-            'id': self.id,
-            'ganancias': self.ganancias,
-            'cantidad_usuarios': self.cantidad_usuarios,
-            'transacciones': [transaccion.serialize() for transaccion in self.transacciones]
-        }
 
 
 #with app.app_context():db.drop_all()
@@ -244,14 +223,8 @@ def register_skin():
             user_id = current_user.id
 
             skin = Skin(name,champion_name,rarity,user_id)
-            
-            db.session.add(skin)
-            db.session.commit()
 
             uid = skin.id
-            # direc = open(f"{app.config['UPLOAD_FOLDER']}/{current_user.id}",f"{current_user.id}.txt")
-            # inputfile = open(direc,"a")
-            # inputfile.write(str(uid) + '\n')
 
             filename = f'{current_user.id}.txt'
             filepath = os.path.join(f"{app.config['UPLOAD_FOLDER']}/{current_user.id}",filename)
@@ -259,10 +232,14 @@ def register_skin():
             with open(filepath,'a') as file:
                 file.write(str(uid) + '\n')
             file.close()
+            
+            skin.image = os.path.join("static/campeones",f'{champion_name}',f'{name}.jpg')
 
             db.session.commit()
             
-            return jsonify({'skin_id':skin.id,'user_id':current_user.id,"message":"Skin agregada"})
+            db.session.add(skin)
+            db.session.commit()
+            return redirect("market")
         else:
             return jsonify({"message" : "current user not authorized"})
     except Exception as e:
@@ -280,6 +257,33 @@ def register_skin():
 # 'on_sale' : self.on_sale,
 # 'skin_image' : self.skin_image,
 # 'precio' : self.precio
+
+@app.route('/show-skins-current2')
+@login_required
+def show_skins_current():
+    user = current_user  # Obtiene el usuario actual autenticado
+    user_id = user.id
+    skins_file = f"static/usuarios/{user_id}/{user_id}.txt"  # Ruta al archivo de skins del usuario
+
+    skins = []
+
+    # Verifica si el archivo de skins existe
+    if os.path.isfile(skins_file):
+        with open(skins_file, 'r') as file:
+            # Lee los IDs de las skins del archivo
+            skin_ids = file.read().splitlines()
+            file.close()
+
+        # Obtiene las skins correspondientes a los IDs del usuario actual
+        skins = Skin.query.filter(Skin.id.in_(skin_ids)).all()
+
+    # Crea una lista de diccionarios con la información de las skins
+    skins_list = []
+    for skin in skins:
+        skin_data = {'id': skin.id, 'nombre': skin.name}
+        skins_list.append(skin_data)
+
+    return jsonify({'skins': skins_list})
 
 
 @app.route('/update-user', methods=['POST'])
@@ -550,6 +554,9 @@ def change_password():
         return jsonify({'succes':False,"message":'error desconocido'})
 
 
+@app.route("/cambiar-imagen",methods=['GET'])
+def cambiar_image():
+    return render_template('CambiandoImagen.html')
 
 @app.route('/change-image',methods=['POST'])
 @login_required
@@ -557,9 +564,7 @@ def change_image():
     try:
 
         if current_user.is_authenticated:
-            if 'image' not in request.files:
-                return  jsonify({'success':False,'message':'No image provided by the user'}),400
-        
+
             file = request.files['image']
 
             if file.filename == '':
@@ -568,14 +573,13 @@ def change_image():
             if not allowed_file(file.filename):
                 return jsonify({'success':False, 'message':'Image format not allowed'}), 400
             
-            dato = request.form.get('new_password')
             cwd = os.getcwd()
 
             user_dir = os.path.join(app.config['UPLOAD_FOLDER'], current_user.id)
-            os.makedirs(user_dir,exist_ok=True)
             upload_folder = os.path.join(cwd,user_dir)
             file.save(os.path.join(upload_folder,file.filename))
             current_user.image = file.filename
+            current_user.image = user_dir
             db.session.commit()
 
             return jsonify({'success':True})
@@ -583,6 +587,8 @@ def change_image():
             return jsonify({'success':False,'message':"user not authenticated"})
     except Exception as e:
         return jsonify({'succes':False,"message":'error desconocido'})
+    finally:
+        db.session.close()
 
 
 @app.route('/show-current',methods=['GET'])
@@ -600,7 +606,6 @@ def hito():
 
 
 @app.route('/comprar-skin',methods=["POST"])
-@login_required
 def comprar_skin():        
     try:
         if current_user.is_authenticated:
@@ -616,10 +621,15 @@ def comprar_skin():
             elif current_user.saldo < int(precio):
                 return jsonify({'success':False,'message':'insufficient amount of money'})
             else:
-                current_user.saldo -= int(precio)
+                
+                precio = int(precio)
+                comision = precio * 0.05
+
+                current_user.saldo -= precio
+
 
                 seller = User.query.filter_by(id=seller_uid).first()
-                seller.saldo += int(precio)
+                seller.saldo += (precio - comision)
 
                 filename_seller = f'{seller_uid}.txt'
                 filepath_seller = os.path.join(f"{app.config['UPLOAD_FOLDER']}/{seller_uid}",filename_seller)
@@ -643,18 +653,24 @@ def comprar_skin():
 
                 #
 
+                boleta = Transaccion(precio,comision,current_user.id,seller_uid,skin_uid)
+ 
+
                 skin = Skin.query.filter_by(id=skin_uid).first()
                 skin.user_id = current_user.id
                 
                 posteo.on_sale = False
-                
+
+                db.session.add(boleta)
                 db.session.commit()
 
                 return jsonify({'success':True,'current_user':current_user.id,'seller':seller.id,'skin_id':skin_uid,'precio':precio})
         else:
             return jsonify({'success':False,'message':'user not authenticated'})
     except Exception as e:
-        return jsonify({'success':False,'message':'error desconocido'})
+        return jsonify({'success':False,'message':str(e)})
+    finally:
+        db.session.close()
 
 
         

@@ -572,6 +572,8 @@ def comprar_skin():
             precio = request.form.get('precio')
             post_id = request.form.get('post_id')
 
+            if post_id == None:
+                return False
             posteo = Postventa.query.filter_by(id=post_id).first()
 
             if current_user.saldo == None or current_user.saldo == 0:

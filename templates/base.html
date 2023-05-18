@@ -91,13 +91,25 @@
             }
         })
     }
+    function AgregarSkin(){
+        window.location.href = "http://127.0.0.1:5000/test";
+    }
+    function ShowSkins(){
+        window.location.href = "http://127.0.0.1:5000/show-skins-current";
+    }
 
     function index(ga){
         if(ga === 1){
-            RegisterUser()
+            RegisterUser();
         }
         if(ga === 2){
-            LoginUser()
+            LoginUser();
+        }
+        if(ga === 3){
+            AgregarSkin();
+        }
+        if(ga === 4){
+            ShowSkins();
         }
     }
 </script>
