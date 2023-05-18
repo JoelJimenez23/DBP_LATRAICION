@@ -56,4 +56,95 @@ Para la Base de datos de Skinloot, se utilizará lo siguiente:
 - *PostgreSQL*: PostgreSQL es un sistema de gestión de bases de datos relacional de código abierto y gratuito. Se utilizará como la base de datos principal de Skinloot, donde se almacenará toda la información relacionada con los usuarios y las transacciones.
 
 ## Información acerca de los API. Requests and Responses de cada endpoint utilizado en el sistema:
-![texto_alternativo](ubicacion_de_la_imagen){width=width height=height}
+Registro
+Método: GET
+Descripción:
+Esta ruta se utiliza para mostrar el formulario de registro en el sitio web.
+
+Parámetros:
+Ninguno.
+
+Retorna:
+La plantilla HTML "register0.html" renderizada.
+
+Ejemplo de uso:
+python
+Copy code
+@app.route('/register', methods=['GET'])
+def register():
+    return render_template('register0.html')
+Registrar Usuario
+Método: POST
+Descripción:
+Esta ruta se utiliza para registrar un nuevo usuario en la base de datos. Se espera que se envíen los siguientes datos del usuario: nickname, e_mail y password. El usuario se crea en la base de datos, se crea una carpeta para el usuario en el sistema de archivos y se guarda un archivo de texto vacío dentro de esa carpeta. Luego, se establecen algunas propiedades adicionales del usuario, como la ruta del archivo de texto y la imagen de perfil. Finalmente, se inicia sesión con el nuevo usuario y se redirige a la página "market".
+
+Parámetros:
+Ninguno.
+
+Retorna:
+Redirección a la página "market" en caso de éxito.
+JSON con los siguientes campos en caso de error:
+success: False
+message: "Error al crear el usuario"
+Ejemplo de uso:
+python
+Copy code
+@app.route('/register-user', methods=['POST'])
+def register_user():
+    # Código de registro del usuario
+Iniciar sesión
+Método: GET
+Descripción:
+Esta ruta se utiliza para mostrar el formulario de inicio de sesión en el sitio web.
+
+Parámetros:
+Ninguno.
+
+Retorna:
+La plantilla HTML "login0.html" renderizada.
+
+Ejemplo de uso:
+python
+Copy code
+@app.route('/login', methods=['GET'])
+def login():
+    return render_template('login0.html')
+Teoría
+Método: GET, POST
+Descripción:
+Esta ruta se utiliza para realizar el inicio de sesión de un usuario. Se espera que se envíen los siguientes datos del usuario: e_mail y password. Se realiza una búsqueda en la base de datos del usuario con el correo electrónico proporcionado. Si se encuentra un usuario con el correo electrónico y la contraseña coincidentes, se inicia sesión con ese usuario y se redirige a la página "market". De lo contrario, se devuelve un JSON indicando que el usuario no está registrado.
+
+Parámetros:
+Ninguno o los siguientes campos en el cuerpo de la solicitud:
+
+e_mail: Correo electrónico del usuario.
+password: Contraseña del usuario.
+Retorna:
+Redirección a la página "market" en caso de éxito.
+JSON con los siguientes campos en caso de error:
+success: False
+message: "User not registered"
+Ejemplo de uso:
+python
+Copy code
+@app.route('/teoria', methods=['GET', 'POST'])
+def teoria():
+    # Código de inicio de sesión del usuario
+Mercado
+Método: GET
+Descripción:
+Esta ruta se utiliza para mostrar la página del mercado en el sitio web. Solo los usuarios autenticados pueden acceder a esta página.
+
+Parámetros:
+Ninguno.
+
+Retorna:
+La plantilla HTML "market2.html" renderizada.
+
+Ejemplo de uso:
+python
+Copy code
+@app.route('/market', methods=['GET'])
+@login_required
+def market():
+    return render_template('market2.html')
