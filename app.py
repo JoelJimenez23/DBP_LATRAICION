@@ -12,7 +12,12 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 
+<<<<<<< Updated upstream
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:230204@localhost:5432/skinloot"
+=======
+
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:546362@localhost:5432/skinloot"
+>>>>>>> Stashed changes
 app.config['UPLOAD_FOLDER'] = 'static/usuarios'
 app.secret_key = 'clave'
 db = SQLAlchemy(app)
@@ -291,19 +296,25 @@ def postventas():
 def create_postventa():
     try:
         if current_user.is_authenticated:
-
-
             title = request.form.get('title')
             skin_id = request.form.get('skin_id')
             precio = request.form.get('price')
             campeon = request.form.get('campeon')
             user_id = current_user.id
+<<<<<<< Updated upstream
             nombre = request.form.get('nombre')
 
             on_sale = True
                     # if already_skin is not None and already_skin.skin_id == skin_id:
                 # return jsonify({"success":False,"message":"skin already published"})    
             # else:
+=======
+            nombre = request.form.get('nombre_skin')
+
+            on_sale = True
+        
+            #already_skin = Postventa.query.filter_by(skin_id=skin_id).filter_by(on_sale=True).first()
+>>>>>>> Stashed changes
 
             postventa = Postventa(title,user_id,skin_id,on_sale,int(precio),nombre,campeon)
             db.session.add(postventa)
@@ -320,6 +331,34 @@ def create_postventa():
         return jsonify({'success':False,'message':'Error al crear skin'})
     finally:
         db.session.close()
+@app.route('/update-user', methods=['POST'])
+def update_user():
+    try:
+        # Obtener los datos del formulario
+        username = request.form.get('username')
+        profile_picture = request.files.get('profile-picture')
+        balance = request.form.get('balance')
+
+        # Actualizar los datos del usuario en la base de datos
+        if current_user.is_authenticated:
+            current_user.nickname = username
+            if profile_picture:
+                profile_picture.save('profile_picture.jpg')
+            current_user.saldo = balance
+
+            db.session.commit()
+
+            return jsonify({'success': True, 'message': 'User data updated successfully'})
+        else:
+            return jsonify({'success': False, 'message': 'User not authenticated'})
+    except Exception as e:
+        print(e)
+        print(sys.exc_info())
+        db.session.rollback()
+        return jsonify({'success': False, 'message': 'Error updating user data'})
+    finally:
+        db.session.close()
+
 
 @app.route('/user_config',methods=['GET'])
 @login_required
@@ -382,16 +421,7 @@ def teoria():
             login_user(user)
             return redirect('market')
         else:
-            email = request.form.get('e_mail')
-            password = request.form.get('password')
-
-            user = User.query.filter_by(e_mail=email).first()
-            if not user:
-                return redirect(url_for('login'))
-
-            if user.password != password:
-                return redirect(url_for('login'))
-                
+            return jsonify({'success':False,'message':"User not registered"})
     except Exception as e:
         print(e)
         return jsonify({'success': False})
@@ -466,7 +496,7 @@ def change_saldo(dato):
         return jsonify({'success':False,'message':'User not authenticated'})
 
 
-@app.route('/change-nickname',methods=['POST'])
+@app.route('/change-nickname', methods=['POST'])
 @login_required
 def change_nickname():
     try:
@@ -474,11 +504,11 @@ def change_nickname():
         if current_user.is_authenticated:
             current_user.nickname = dato
             db.session.commit()
-            return jsonify({'success':True})
+            return jsonify({'success': True})
         else:
-            return jsonify({'success':False,'message':"user not authenticated"})
+            return jsonify({'success': False, 'message': "user not authenticated"})
     except Exception as e:
-        return jsonify({'succes':False,"message":'error desconocido'})
+        return jsonify({'success': False, 'message': 'unknown error'})
 
 
 
@@ -632,5 +662,3 @@ if __name__ == '__main__':
     app.run(debug=True)
 else:
     print('Importing {}'.format(__name__))
-
-

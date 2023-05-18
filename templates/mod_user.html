@@ -170,8 +170,14 @@
  <h1 class="big-text2 text-center">Edit Profile</h1>
  <!-- Create five buttons with card titles -->
  <!-- Add a data-toggle and data-target attribute to trigger modal -->
- <div class="button text-center" data-toggle="modal" data-target="#changeNameModal">
- <h4 class="card-title">Change name</h4>
+ <!-- Create a form with an input for new name and a button to submit -->
+<form id="changeNameForm" action="/change-nickname" method="POST">
+    <div class="form-group">
+      <label for="newNameInput">Enter your new name:</label>
+      <input type="text" class="form-control" id="newNameInput" name="new_nickname" placeholder="John Doe" required>
+    </div>
+    <button type="submit" class="btn btn-primary mt-3">Submit</button>
+  </form>
  </div>
  <div class="button text-center" data-toggle="modal" data-target="#changePictureModal">
     <h4 class="card-title">Change profile picture</h4>
@@ -226,6 +232,7 @@
     <!-- Create a form with an input for new picture and a button to submit -->
     <form id="changePictureForm">
     <div class="form-group">
+
     <label for="newPictureInput">Choose a new picture:</label>
     <input type="file" class="form-control" id="newPictureInput" accept="image/*" required> <!-- ACA DEBES SACAR EL ID PARA CONECTARLO CON EL BACKEND -->
     </div>
