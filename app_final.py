@@ -216,19 +216,109 @@ def logout():
     logout_user()
     return redirect(url_for("index"))
 
-@app.route('/s',methods=['GET'])
-def s():
-    return render_template('mod_user.html')
+# REGISTRAR Y LOGIN USER
+@app.route('/register',methods=['GET'])
+def register():
+    return render_template('register0.html')
 
-@app.route('/make_post',methods=['GET'])
+@app.route('/register-user',methods=['POST'])
+def register_user():
+    try:
+        nickname  = request.form.get('nickname')
+        e_mail = request.form.get('e_mail')
+        password = request.form.get('password')
+
+        user = User(nickname,e_mail,password)
+        db.session.add(user)
+        db.session.commit()
+
+        cwd = os.getcwd()
+
+        user_dir = os.path.join(app.config['UPLOAD_FOLDER'],user.id)
+        os.makedirs(user_dir,exist_ok=True)
+        upload_folder = os.path.join(cwd,user_dir)
+
+        # archivo = os.path.join(upload_folder,f'{user.id}.txt')
+        file  = open(f"{user_dir}/{user.id}.txt",'w')
+        file.close()
+        user.skins_hashes = f'{user.id}.txt'
+
+        db.session.commit()
+        image_dir = os.path.join('static/images/persona.png')
+        user.image = image_dir
+        db.session.commit()
+        login_user(user)
+        return redirect('market')
+    except Exception as e:
+        print(e)
+        print(sys.exc_info())
+        db.session.rollback()
+        return jsonify({'success':False,'message':'Error al crear el usuario'}) #redirect a la pagina que quieras 
+    finally:
+        db.session.close()
+
+@app.route('/teoria', methods=["GET","POST"])
+def teoria():
+    try:
+        e_mail = request.form.get('e_mail')
+        password = request.form.get('password')
+        user = User.query.filter_by(e_mail=e_mail).first()
+
+        if user is not None and user.password == password:
+            # El usuario con el correo electrónico proporcionado se encontró en la base de datos
+            login_user(user)
+            return redirect('market')
+        else:
+            email = request.form.get('e_mail')
+            password = request.form.get('password')
+
+            user = User.query.filter_by(e_mail=email).first()
+            if not user:
+                return redirect(url_for('login'))
+
+            if user.password != password:
+                return redirect(url_for('login'))
+                
+    except Exception as e:
+        print(e)
+        return jsonify({'success': False})
+
+@app.route('/login',methods=['GET'])
+def login():
+    return render_template('login0.html')
+# END REGISTRAR Y LOGIN USER
+
+# PAGINA PRINCIPAL
+@app.route('/market',methods=['GET'])
 @login_required
-def make_post():
-    return render_template('form-venta-v2.html')
+def market():
+    return render_template('market2.html')
+# END PAGINA PRINCIPAL
 
-@app.route('/prueba',methods=["GET"])
-def prueba():
-    return render_template('skin_register_prueba.html')
+# CONFIGURACION USER
+@app.route('/user_config',methods=['GET'])
+@login_required
+def user_config():
+    return render_template('usuario.html')
 
+# -- ver skins -- 
+@app.route('/view_skins',methods=['GET'])
+@login_required
+def view_skins():
+    return render_template('view_skins.html')
+
+@app.route('/show-skins-current',methods=["GET"])
+@login_required
+def current_skins():
+    try:
+        skins = Skin.query.filter_by(user_id=current_user.id).all()
+
+        skins_serialized = [skin.serialize() for skin in skins]
+        return jsonify({'success':True,'serialized':skins_serialized})
+    except:
+        return jsonify({"success":False})
+
+# -- agregar skin --
 @app.route('/register-skin',methods=['POST'])
 @login_required
 def register_skin():
@@ -266,6 +356,27 @@ def register_skin():
         return jsonify({'success':False,'message':'Error al crear skin'})
     finally:
         db.session.close()
+
+
+
+
+
+
+
+
+
+
+
+
+
+@app.route('/make_post',methods=['GET'])
+@login_required
+def make_post():
+    return render_template('form-venta-v2.html')
+
+
+
+
 
 @app.route('/test-post', methods=["GET"])
 def postventas():
@@ -333,9 +444,7 @@ def get_skin_details(skin_id):
 
 
 
-##########################################################################################################
 
-#hacer la logica de la skin
 
 
 @app.route('/show-skins-current2')
@@ -357,9 +466,8 @@ def show_skins_current2():
         print(e)
         return jsonify({'success': False, 'message': 'Error fetching skins'})
 
+##########################################################################################################
 
-
-# Ruta del endpoint para obtener las skins actuales
 
 
 @app.route('/make_post')
@@ -376,90 +484,6 @@ def skins():
 
     return render_template('form-venta-v2.html', skin_names=skin_names)
 
-
-
-#fin de la logica de la skin
-
-
-@app.route('/user_config',methods=['GET'])
-@login_required
-def user_config():
-    return render_template('usuario.html')
-
-@app.route('/register',methods=['GET'])
-def register():
-    return render_template('register0.html')
-
-@app.route('/register-user',methods=['POST'])
-def register_user():
-    try:
-        nickname  = request.form.get('nickname')
-        e_mail = request.form.get('e_mail')
-        password = request.form.get('password')
-
-        user = User(nickname,e_mail,password)
-        db.session.add(user)
-        db.session.commit()
-
-        cwd = os.getcwd()
-
-        user_dir = os.path.join(app.config['UPLOAD_FOLDER'],user.id)
-        os.makedirs(user_dir,exist_ok=True)
-        upload_folder = os.path.join(cwd,user_dir)
-
-        # archivo = os.path.join(upload_folder,f'{user.id}.txt')
-        file  = open(f"{user_dir}/{user.id}.txt",'w')
-        file.close()
-        user.skins_hashes = f'{user.id}.txt'
-
-        db.session.commit()
-        image_dir = os.path.join('static/images/persona.png')
-        user.image = image_dir
-        db.session.commit()
-        login_user(user)
-        return redirect('market')
-    except Exception as e:
-        print(e)
-        print(sys.exc_info())
-        db.session.rollback()
-        return jsonify({'success':False,'message':'Error al crear el usuario'}) #redirect a la pagina que quieras 
-    finally:
-        db.session.close()
-
-@app.route('/login',methods=['GET'])
-def login():
-    return render_template('login0.html')
-
-@app.route('/teoria', methods=["GET","POST"])
-def teoria():
-    try:
-        e_mail = request.form.get('e_mail')
-        password = request.form.get('password')
-        user = User.query.filter_by(e_mail=e_mail).first()
-
-        if user is not None and user.password == password:
-            # El usuario con el correo electrónico proporcionado se encontró en la base de datos
-            login_user(user)
-            return redirect('market')
-        else:
-            email = request.form.get('e_mail')
-            password = request.form.get('password')
-
-            user = User.query.filter_by(e_mail=email).first()
-            if not user:
-                return redirect(url_for('login'))
-
-            if user.password != password:
-                return redirect(url_for('login'))
-                
-    except Exception as e:
-        print(e)
-        return jsonify({'success': False})
-    
-@app.route('/market',methods=['GET'])
-@login_required
-def market():
-    return render_template('market2.html')
 
 
 @app.route('/update-user', methods=['POST'])
@@ -515,21 +539,6 @@ def showPosts():
         return jsonify({'success':True,"serialized":posts_serialized})
     except Exception as e:
         return jsonify({"success":False})
-
-
-@app.route('/show-skins-current',methods=["GET"])
-@login_required
-def current_skins():
-    try:
-        skins = Skin.query.filter_by(user_id=current_user.id).all()
-
-        skins_serialized = [skin.serialize() for skin in skins]
-        return jsonify({'success':True,'serialized':skins_serialized})
-    except:
-        return jsonify({"success":False})
-
-        
-
 
 @app.route('/change-saldo/<dato>',methods=['GET'])
 @login_required
