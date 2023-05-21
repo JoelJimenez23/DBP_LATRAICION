@@ -1,3 +1,4 @@
+# IMPORTS
 from flask import Flask,render_template,jsonify,request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 import uuid
@@ -6,25 +7,25 @@ import sys
 from flask_migrate import Migrate
 import os
 from flask_login import login_user,login_required,current_user,LoginManager,UserMixin, logout_user
+# END IMPORTS
 
+# CONFIGURACIONES
 app = Flask(__name__)
 login_manager = LoginManager()
 login_manager.init_app(app)
-
-
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:1234@localhost:5432/s"
 app.config['UPLOAD_FOLDER'] = 'static/usuarios'
 app.secret_key = 'clave'
 db = SQLAlchemy(app)
+# END CONFIGURACIONES
 
-# para migraciones
+# MIGRACIONES
 migrate = Migrate(app,db)
+# END MIGRACIONES
 
 ALLOWED_EXTENSIONS = {'png','jpeg','jpg'}
 
-# Empezamos los modelos: 
-# e_mail = db.Column(db.String(100),primary_key=True,nullable=False,unique=True)
-
+# MODELOS
 class Skin(db.Model):
     __tablename__ = 'skins'
     id = db.Column(db.String(36),primary_key=True,unique=True,default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
@@ -41,7 +42,6 @@ class Skin(db.Model):
         self.rarity = rarity
         self.user_id = user_id
     
-
     def serialize(self):
         return{
             'id': self.id,
@@ -52,8 +52,6 @@ class Skin(db.Model):
             'user_id' : self.user_id
         }
 
-
-
 class User(UserMixin,db.Model):
     __tablename__ = 'users'
     id = db.Column(db.String(36),primary_key=True,default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
@@ -63,8 +61,6 @@ class User(UserMixin,db.Model):
     password = db.Column(db.String(100),unique=False,nullable=False)
     saldo = db.Column(db.Integer,nullable=True,server_default='0')
     image = db.Column(db.String(500),nullable=True)
-    # skins = db.relationship('Skin',backref='user',lazy=True)
-
 
     def __init__(self,nickname,e_mail,password):
         self.nickname = nickname
@@ -99,7 +95,6 @@ class Postventa(db.Model):
     skin = db.relationship('Skin', backref=db.backref('postventa', post_update=True))
     user = db.relationship('User', backref=db.backref('postventa', post_update=True))
 
-
     def __init__(self,title,user_id,skin_id,on_sale,precio,campeon, skin_image,nombre):
         self.title = title
         self.user_id = user_id
@@ -125,7 +120,6 @@ class Postventa(db.Model):
 
 class Transaccion(db.Model):
     __tablename__ = 'transacciones'
-
     id = db.Column(db.String(36), primary_key=True, unique=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
     fecha_inicio = db.Column(db.DateTime, nullable=False)
     precio = db.Column(db.Float, nullable=False)
@@ -155,9 +149,9 @@ class Transaccion(db.Model):
             'nombre_skin': self.nombre_skin,
             'empresa_id': self.empresa_id
         }
+    
 class Trade(db.Model):
     __tablename__ = 'trades'
-
     id = db.Column(db.String(36), primary_key=True, unique=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
     fecha_inicio = db.Column(db.DateTime, nullable=False)
     nombre_comprador = db.Column(db.String(100), nullable=False)
@@ -181,9 +175,9 @@ class Trade(db.Model):
             'nombre_vendedor': self.nombre_vendedor,
             'nombre_skin_vendedor': self.nombre_skin_vendedor
         }
+    
 class Empresa(db.Model):
     __tablename__ = 'empresas'
-
     id = db.Column(db.String(36), primary_key=True, unique=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
     ganancias = db.Column(db.Float, nullable=False)
     cantidad_usuarios = db.Column(db.Integer, nullable=False)
@@ -200,19 +194,17 @@ class Empresa(db.Model):
             'cantidad_usuarios': self.cantidad_usuarios,
             'transacciones': [transaccion.serialize() for transaccion in self.transacciones]
         }
+# END MODELOS
 
-
+# CREACION Y ELIMINACION DE TABLAS
 #with app.app_context():db.drop_all()
 with app.app_context():db.create_all()
-# Empezamos las rutas:
+# END CREACION Y ELIMINACION DE TABLAS
 
+# RUTAS
 @app.route('/',methods=['GET'])
 def index():
     return render_template('index0.html')
-
-@app.route('/s',methods=['GET'])
-def s():
-    return render_template('mod_user.html')
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -223,6 +215,10 @@ def load_user(user_id):
 def logout():
     logout_user()
     return redirect(url_for("index"))
+
+@app.route('/s',methods=['GET'])
+def s():
+    return render_template('mod_user.html')
 
 @app.route('/make_post',methods=['GET'])
 @login_required
@@ -465,6 +461,42 @@ def teoria():
 def market():
     return render_template('market2.html')
 
+
+@app.route('/update-user', methods=['POST'])
+def update_user():
+    try:
+        # Obtener los datos del formulario
+        username = request.form.get('username')
+        profile_picture = request.files.get('profile-picture')
+        balance = request.form.get('balance')
+
+        # Actualizar los datos del usuario en la base de datos
+        if current_user.is_authenticated:
+            if username != "" or balance != "" or profile_picture:
+                if username != "":
+                    current_user.nickname = username
+
+                if balance != "":
+                    if current_user.saldo is not None:
+                        current_user.saldo += int(balance)
+                    else:
+                        current_user.saldo = int(balance)
+                if profile_picture is not None:
+                    profile_picture.save('profile_picture.jpg')
+
+            db.session.commit()
+            return redirect('market')
+        else:
+            return jsonify({'success': False, 'message': 'User not authenticated'})
+    except Exception as e:
+        print(e)
+        print(sys.exc_info())
+        db.session.rollback()
+        return jsonify({'success': False, 'message': 'Error updating user data'})
+    finally:
+        db.session.close()
+
+
 @app.route('/show-skins',methods=['GET'])
 def showSkins():
     try:
@@ -497,22 +529,7 @@ def current_skins():
         return jsonify({"success":False})
 
         
-# @app.route('/change-saldo',methods=['POST'])
-# @login_required
-# def change_saldo():
-#     try:
-#         dato = request.form.get('new_saldo')
-#         if current_user.is_authenticated:
-#             if current_user.saldo != None:
-#                 current_user.saldo += int(dato)
-#             else:
-#                 current_user.saldo = int(dato)
-#             db.session.commit()
-#             return jsonify({'success':True})
-#         else:
-#             return jsonify({'success':False,'message':"user not authenticated"})
-#     except Exception as e:
-#         return jsonify({'succes':False,"message":'error desconocido'})
+
 
 @app.route('/change-saldo/<dato>',methods=['GET'])
 @login_required
