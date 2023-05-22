@@ -51,8 +51,8 @@
         <button type="submit" class="btn btn-primary button">Guardar Cambios</button>
         <a href="/logout" id="logout-link" class="button">Cerrar sesión</a>
     </form>
-    <button class="btn btn-secondary button">Ver Skins</button>
-    <button class="btn btn-secondary button">Agregar Skins</button>
+    <button class="btn btn-secondary button" onclick="redirectToViewSkins()">Ver Skins</button>
+    <button class="btn btn-secondary button" onclick="redirectToAddSkins()" >Agregar Skins</button>
     <script>
         $(document).ready(function() {
       $('#logout-link').click(function(e) {
@@ -64,6 +64,12 @@
         });
       });
     });
+    function redirectToAddSkins() {
+        window.location.href = "/add_skins";
+    }
+    function redirectToViewSkins() {
+        window.location.href = "/view_skins";
+    }
     </script>
 </div>
 {% endblock %}

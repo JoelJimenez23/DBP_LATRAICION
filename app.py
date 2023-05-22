@@ -1,3 +1,4 @@
+# IMPORTS
 from flask import Flask,render_template,jsonify,request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 import uuid
@@ -6,25 +7,25 @@ import sys
 from flask_migrate import Migrate
 import os
 from flask_login import login_user,login_required,current_user,LoginManager,UserMixin, logout_user
+# END IMPORTS
 
+# CONFIGURACIONES
 app = Flask(__name__)
 login_manager = LoginManager()
 login_manager.init_app(app)
-
-
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:230204@localhost:5432/skinloot"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:1234@localhost:5432/skinlootfinal"
 app.config['UPLOAD_FOLDER'] = 'static/usuarios'
 app.secret_key = 'clave'
 db = SQLAlchemy(app)
+# END CONFIGURACIONES
 
-# para migraciones
+# MIGRACIONES
 migrate = Migrate(app,db)
+# END MIGRACIONES
 
 ALLOWED_EXTENSIONS = {'png','jpeg','jpg'}
 
-# Empezamos los modelos: 
-# e_mail = db.Column(db.String(100),primary_key=True,nullable=False,unique=True)
-
+# MODELOS
 class Skin(db.Model):
     __tablename__ = 'skins'
     id = db.Column(db.String(36),primary_key=True,unique=True,default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
@@ -41,7 +42,6 @@ class Skin(db.Model):
         self.rarity = rarity
         self.user_id = user_id
     
-
     def serialize(self):
         return{
             'id': self.id,
@@ -52,8 +52,6 @@ class Skin(db.Model):
             'user_id' : self.user_id
         }
 
-
-
 class User(UserMixin,db.Model):
     __tablename__ = 'users'
     id = db.Column(db.String(36),primary_key=True,default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
@@ -63,8 +61,6 @@ class User(UserMixin,db.Model):
     password = db.Column(db.String(100),unique=False,nullable=False)
     saldo = db.Column(db.Integer,nullable=True,server_default='0')
     image = db.Column(db.String(500),nullable=True)
-    # skins = db.relationship('Skin',backref='user',lazy=True)
-
 
     def __init__(self,nickname,e_mail,password):
         self.nickname = nickname
@@ -89,26 +85,25 @@ class Postventa(db.Model):
     __tablename__ = 'postventa'
     id = db.Column(db.String(36),primary_key=True,default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
     title = db.Column(db.String(100),unique=False,nullable=False)
-    nombre = db.Column (db.String(100), nullable=False)
     campeon = db.Column (db.String(100), nullable=False)
     user_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
     skin_id = db.Column (db.String(36), db.ForeignKey('skins.id'), nullable=False)
     skin_image = db.Column(db.String(500),nullable=True)
+    nombre = db.Column (db.String(100), nullable=False)
     on_sale = db.Column(db.Boolean,unique=False,nullable=False)
     precio = db.Column(db.Integer, nullable=False)
     skin = db.relationship('Skin', backref=db.backref('postventa', post_update=True))
     user = db.relationship('User', backref=db.backref('postventa', post_update=True))
 
-
-    def __init__(self,title,user_id,skin_id,on_sale,precio,nombre,campeon):
+    def __init__(self,title,user_id,skin_id,on_sale,precio,campeon, skin_image,nombre):
         self.title = title
         self.user_id = user_id
         self.skin_id = skin_id
         self.on_sale = on_sale
         self.precio = precio
-        self.nombre = nombre
         self.campeon = campeon
-
+        self.skin_image = skin_image
+        self.nombre = nombre
 
     def serialize(self):
         return{
@@ -125,36 +120,32 @@ class Postventa(db.Model):
 
 class Transaccion(db.Model):
     __tablename__ = 'transacciones'
-
     id = db.Column(db.String(36), primary_key=True, unique=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
-    fecha_inicio = db.Column(db.DateTime, nullable=False)
+    fecha = db.Column(db.DateTime(timezone=True), nullable=False, server_default=db.text("now()"))
     precio = db.Column(db.Float, nullable=False)
     comision = db.Column(db.Float, nullable=False)
-    nombre_comprador = db.Column(db.String(100), nullable=False)
-    nombre_vendedor = db.Column(db.String(100), nullable=False)
-    nombre_skin = db.Column(db.String(100), nullable=False)
-    empresa_id = db.Column(db.String(36), db.ForeignKey('empresas.id'), nullable=False)
+    id_comprador = db.Column(db.String(36), nullable=False)
+    id_vendedor = db.Column(db.String(100), nullable=False)
+    id_skin = db.Column(db.String(100), nullable=False)
 
-    def __init__(self, fecha_inicio, precio, comision, nombre_comprador, nombre_vendedor, nombre_skin, empresa_id):
-        self.fecha_inicio = fecha_inicio
+    def __init__(self,precio, comision, id_comprador, id_vendedor, id_skin):
         self.precio = precio
         self.comision = comision
-        self.nombre_comprador = nombre_comprador
-        self.nombre_vendedor = nombre_vendedor
-        self.nombre_skin = nombre_skin
-        self.empresa_id = empresa_id
+        self.id_comprador = id_comprador
+        self.id_vendedor = id_vendedor
+        self.id_skin = id_skin
 
     def serialize(self):
         return {
             'id': self.id,
-            'fecha_inicio': self.fecha_inicio,
+            'fecha': self.fecha,
             'precio': self.precio,
             'comision': self.comision,
-            'nombre_comprador': self.nombre_comprador,
-            'nombre_vendedor': self.nombre_vendedor,
-            'nombre_skin': self.nombre_skin,
-            'empresa_id': self.empresa_id
+            'id_comprador': self.id_comprador,
+            'id_vendedor': self.id_vendedor,
+            'id_skin': self.id_skin,
         }
+    
 class Trade(db.Model):
     __tablename__ = 'trades'
 
@@ -181,38 +172,18 @@ class Trade(db.Model):
             'nombre_vendedor': self.nombre_vendedor,
             'nombre_skin_vendedor': self.nombre_skin_vendedor
         }
-class Empresa(db.Model):
-    __tablename__ = 'empresas'
+    
+# END MODELOS
 
-    id = db.Column(db.String(36), primary_key=True, unique=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
-    ganancias = db.Column(db.Float, nullable=False)
-    cantidad_usuarios = db.Column(db.Integer, nullable=False)
-    transacciones = db.relationship('Transaccion', backref='empresa', lazy=True)
-
-    def __init__(self, ganancias, cantidad_usuarios):
-        self.ganancias = ganancias
-        self.cantidad_usuarios = cantidad_usuarios
-
-    def serialize(self):
-        return {
-            'id': self.id,
-            'ganancias': self.ganancias,
-            'cantidad_usuarios': self.cantidad_usuarios,
-            'transacciones': [transaccion.serialize() for transaccion in self.transacciones]
-        }
-
-
+# CREACION Y ELIMINACION DE TABLAS
 #with app.app_context():db.drop_all()
 with app.app_context():db.create_all()
-# Empezamos las rutas:
+# END CREACION Y ELIMINACION DE TABLAS
 
+# RUTAS
 @app.route('/',methods=['GET'])
 def index():
     return render_template('index0.html')
-
-@app.route('/s',methods=['GET'])
-def s():
-    return render_template('mod_user.html')
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -224,133 +195,7 @@ def logout():
     logout_user()
     return redirect(url_for("index"))
 
-@app.route('/make_post',methods=['GET'])
-@login_required
-def make_post():
-    return render_template('post_venta.html')
-
-@app.route('/prueba',methods=["GET"])
-def prueba():
-    return render_template('skin_register_prueba.html')
-
-@app.route('/register-skin',methods=['POST'])
-@login_required
-def register_skin():
-    try:
-        if current_user.is_authenticated:
-            name = request.form.get('name')
-            champion_name = request.form.get('champion_name')
-            rarity = request.form.get('rarity')
-            user_id = current_user.id
-
-            skin = Skin(name,champion_name,rarity,user_id)
-            
-            db.session.add(skin)
-            db.session.commit()
-
-            uid = skin.id
-            # direc = open(f"{app.config['UPLOAD_FOLDER']}/{current_user.id}",f"{current_user.id}.txt")
-            # inputfile = open(direc,"a")
-            # inputfile.write(str(uid) + '\n')
-
-            filename = f'{current_user.id}.txt'
-            filepath = os.path.join(f"{app.config['UPLOAD_FOLDER']}/{current_user.id}",filename)
-
-            with open(filepath,'a') as file:
-                file.write(str(uid) + '\n')
-            file.close()
-
-            db.session.commit()
-            
-            return jsonify({'skin_id':skin.id,'user_id':current_user.id,"message":"Skin agregada"})
-        else:
-            return jsonify({"message" : "current user not authorized"})
-    except Exception as e:
-        print(e)
-        print(sys.exc_info())
-        db.session.rollback()
-        return jsonify({'success':False,'message':'Error al crear skin'})
-    finally:
-        db.session.close()
-
-# 'id': self.id,
-# 'title' : self.title,
-# 'user_id' : self.user_id,
-# 'skin_id': self.skin_id,
-# 'on_sale' : self.on_sale,
-# 'skin_image' : self.skin_image,
-# 'precio' : self.precio
-
-@app.route('/test-post', methods=["GET"])
-def postventas():
-    return render_template('formVenta.html')
-
-##########################################################################################################
-@app.route('/create-PostVenta',methods=['POST'])
-@login_required
-def create_postventa():
-    try:
-        if current_user.is_authenticated:
-            title = request.form.get('title')
-            skin_id = request.form.get('skin_id')
-            precio = request.form.get('price')
-            campeon = request.form.get('campeon')
-            user_id = current_user.id
-            nombre = request.form.get('nombre')
-
-            on_sale = True
-        
-            #already_skin = Postventa.query.filter_by(skin_id=skin_id).filter_by(on_sale=True).first()
-
-            postventa = Postventa(title,user_id,skin_id,on_sale,int(precio),nombre,campeon)
-            db.session.add(postventa)
-            db.session.commit()
-            postventa.skin_image = os.path.join("static/campeones",f'{campeon}',f'{nombre}.jpg')
-            db.session.commit()
-            return jsonify({'success':True,'title':title,'user_id':user_id,'nombre':nombre,'campeon':campeon,'skin_id':skin_id,'on_sale':on_sale})
-        else:
-            return jsonify({'success':False,'message':'not logged'})
-    except Exception as e:
-        print(e)
-        print(sys.exc_info())
-        db.session.rollback()
-        return jsonify({'success':False,'message':'Error al crear skin'})
-    finally:
-        db.session.close()
-@app.route('/update-user', methods=['POST'])
-def update_user():
-    try:
-        # Obtener los datos del formulario
-        username = request.form.get('username')
-        profile_picture = request.files.get('profile-picture')
-        balance = request.form.get('balance')
-
-        # Actualizar los datos del usuario en la base de datos
-        if current_user.is_authenticated:
-            current_user.nickname = username
-            if profile_picture:
-                profile_picture.save('profile_picture.jpg')
-            current_user.saldo = balance
-
-            db.session.commit()
-
-            return jsonify({'success': True, 'message': 'User data updated successfully'})
-        else:
-            return jsonify({'success': False, 'message': 'User not authenticated'})
-    except Exception as e:
-        print(e)
-        print(sys.exc_info())
-        db.session.rollback()
-        return jsonify({'success': False, 'message': 'Error updating user data'})
-    finally:
-        db.session.close()
-
-
-@app.route('/user_config',methods=['GET'])
-@login_required
-def user_config():
-    return render_template('usuario.html')
-
+# REGISTRAR Y LOGIN USER
 @app.route('/register',methods=['GET'])
 def register():
     return render_template('register0.html')
@@ -391,10 +236,6 @@ def register_user():
     finally:
         db.session.close()
 
-@app.route('/login',methods=['GET'])
-def login():
-    return render_template('login0.html')
-
 @app.route('/teoria', methods=["GET","POST"])
 def teoria():
     try:
@@ -407,35 +248,45 @@ def teoria():
             login_user(user)
             return redirect('market')
         else:
-            return jsonify({'success':False,'message':"User not registered"})
+            email = request.form.get('e_mail')
+            password = request.form.get('password')
+
+            user = User.query.filter_by(e_mail=email).first()
+            if not user:
+                return redirect(url_for('login'))
+
+            if user.password != password:
+                return redirect(url_for('login'))
+                
     except Exception as e:
         print(e)
         return jsonify({'success': False})
-    
+
+@app.route('/login',methods=['GET'])
+def login():
+    return render_template('login0.html')
+# END REGISTRAR Y LOGIN USER
+
+# PAGINA PRINCIPAL
 @app.route('/market',methods=['GET'])
 @login_required
 def market():
-    return render_template('market2.html')
+    if current_user.is_authenticated:
+        saldo = current_user.saldo
+        return render_template('market2.html', saldo = saldo)
+# END PAGINA PRINCIPAL
 
-@app.route('/show-skins',methods=['GET'])
-def showSkins():
-    try:
-        skins = Skin.query.all()
-        skins_serialized  = [skin.serialize() for skin in skins]
-        return jsonify({'success':True,"skins":skins_serialized}),200
-    except Exception as e:
-        return jsonify({"success":False})
+# CONFIGURACION USER
+@app.route('/user_config',methods=['GET'])
+@login_required
+def user_config():
+    return render_template('usuario.html')
 
-@app.route('/show-posts',methods=['GET'])
-def showPosts():
-    try:
-        posts = Postventa.query.filter_by(on_sale=True).all()
-        # posts = Postventa.query.all()
-        posts_serialized = [post.serialize() for post in posts]
-        return jsonify({'success':True,"serialized":posts_serialized})
-    except Exception as e:
-        return jsonify({"success":False})
-
+# -- ver skins -- 
+@app.route('/view_skins',methods=['GET'])
+@login_required
+def view_skins():
+    return render_template('view_skins.html')
 
 @app.route('/show-skins-current',methods=["GET"])
 @login_required
@@ -448,138 +299,191 @@ def current_skins():
     except:
         return jsonify({"success":False})
 
-        
-# @app.route('/change-saldo',methods=['POST'])
-# @login_required
-# def change_saldo():
-#     try:
-#         dato = request.form.get('new_saldo')
-#         if current_user.is_authenticated:
-#             if current_user.saldo != None:
-#                 current_user.saldo += int(dato)
-#             else:
-#                 current_user.saldo = int(dato)
-#             db.session.commit()
-#             return jsonify({'success':True})
-#         else:
-#             return jsonify({'success':False,'message':"user not authenticated"})
-#     except Exception as e:
-#         return jsonify({'succes':False,"message":'error desconocido'})
-
-@app.route('/change-saldo/<dato>',methods=['GET'])
+# -- agregar skin --
+@app.route('/register-skin',methods=['POST'])
 @login_required
-def change_saldo(dato):
-    if current_user.is_authenticated:
-        if current_user.saldo != None:
-            current_user.saldo += int(dato)
-            db.session.commit()
-            return jsonify({'success':True})
-        else:
-            current_user.saldo = int(dato)
-            db.session.commit()
-            return jsonify({'success':True})
-    else:
-        return jsonify({'success':False,'message':'User not authenticated'})
-
-
-@app.route('/change-nickname', methods=['POST'])
-@login_required
-def change_nickname():
+def register_skin():
     try:
-        dato = request.form.get('new_nickname')
         if current_user.is_authenticated:
-            current_user.nickname = dato
-            db.session.commit()
-            return jsonify({'success': True})
-        else:
-            return jsonify({'success': False, 'message': "user not authenticated"})
-    except Exception as e:
-        return jsonify({'success': False, 'message': 'unknown error'})
+            name = request.form.get('name')
+            champion_name = request.form.get('champion_name')
+            rarity = request.form.get('rarity')
+            user_id = current_user.id
 
+            skin = Skin(name,champion_name,rarity,user_id)
 
+            uid = skin.id
 
-@app.route('/change-e_mail',methods=['POST'])
-@login_required
-def change_e_mail():
-    try:
-        dato = request.form.get('new_e_mail')
-        if current_user.is_authenticated:
-            current_user.nickname = dato
-            db.session.commit()
-            return jsonify({'success':True})
-        else:
-            return jsonify({'success':False,'message':"user not authenticated"})
-    except Exception as e:
-        return jsonify({'succes':False,"message":'error desconocido'})
+            filename = f'{current_user.id}.txt'
+            filepath = os.path.join(f"{app.config['UPLOAD_FOLDER']}/{current_user.id}",filename)
 
-
-
-@app.route('/change-password',methods=['POST'])
-@login_required
-def change_password():
-    try:
-        dato = request.form.get('new_password')
-        if current_user.is_authenticated:
-            current_user.nickname = dato
-            db.session.commit()
-            return jsonify({'success':True})
-        else:
-            return jsonify({'success':False,'message':"user not authenticated"})
-    except Exception as e:
-        return jsonify({'succes':False,"message":'error desconocido'})
-
-
-
-@app.route('/change-image',methods=['POST'])
-@login_required
-def change_image():
-    try:
-
-        if current_user.is_authenticated:
-            if 'image' not in request.files:
-                return  jsonify({'success':False,'message':'No image provided by the user'}),400
-        
-            file = request.files['image']
-
-            if file.filename == '':
-                return jsonify({'success':False,'message':'No image selected'}), 400
-
-            if not allowed_file(file.filename):
-                return jsonify({'success':False, 'message':'Image format not allowed'}), 400
+            with open(filepath,'a') as file:
+                file.write(str(uid) + '\n')
+            file.close()
             
-            dato = request.form.get('new_password')
-            cwd = os.getcwd()
+            skin.image = os.path.join("static/campeones",f'{champion_name}',f'{name}.jpg')
 
-            user_dir = os.path.join(app.config['UPLOAD_FOLDER'], current_user.id)
-            os.makedirs(user_dir,exist_ok=True)
-            upload_folder = os.path.join(cwd,user_dir)
-            file.save(os.path.join(upload_folder,file.filename))
-            current_user.image = file.filename
+            db.session.commit()
+            
+            db.session.add(skin)
+            db.session.commit()
+            return redirect("market")
+        else:
+            return jsonify({"message" : "current user not authorized"})
+    except Exception as e:
+        print(e)
+        print(sys.exc_info())
+        db.session.rollback()
+        return jsonify({'success':False,'message':'Error al crear skin'})
+    finally:
+        db.session.close()
+
+@app.route('/add_skins',methods=["GET"])
+def prueba():
+    return render_template('skin_register.html')
+
+# -- cambiar datos --
+from sqlalchemy.orm import Session
+
+@app.route('/update-user', methods=['POST'])
+def update_user():
+    try:
+        # Obtener los datos del formulario
+        username = request.form.get('username')
+        profile_picture = request.files.get('profile-picture')
+        balance = request.form.get('balance')
+
+        # Actualizar los datos del usuario en la base de datos
+        if current_user.is_authenticated:
+            if username or balance or profile_picture:
+                if username:
+                    current_user.nickname = username
+
+                if balance:
+                    if current_user.saldo is not None:
+                        current_user.saldo += int(balance)
+                    else:
+                        current_user.saldo = int(balance)
+
+                if profile_picture:
+                    # Guardar la imagen de perfil en el servidor
+                    current_user.profile_picture = profile_picture
+
+                session = Session.object_session(current_user)
+                session.commit()
+                return redirect('market')
+            else:
+                return jsonify({'success': False, 'message': 'No se proporcionaron datos para actualizar'})
+        else:
+            return jsonify({'success': False, 'message': 'Usuario no autenticado'})
+    except Exception as e:
+        print(e)
+        session.rollback()
+        return jsonify({'success': False, 'message': 'Error al actualizar los datos del usuario'})
+    finally:
+        session.close()
+# END CONFIGURACION USER
+
+# CREAR POST DE VENTA
+@app.route('/make_post',methods=['GET'])
+@login_required
+def make_post():
+    return render_template('form-venta-v2.html')
+
+@app.route('/make_post')
+@login_required
+def skins():
+    user = current_user  # Obtiene el usuario actual autenticado
+    skin_ids = user.skin_hashes.split('\n') if user.skin_hashes else []  # Convierte los IDs de las skins en una lista
+
+    # Obtiene las skins correspondientes a los IDs del usuario actual
+    skins = Skin.query.filter(Skin.id.in_(skin_ids)).all()
+
+    # Crea una lista de nombres de las skins del usuario
+    skin_names = [skin.nombres for skin in skins]
+
+    return render_template('form-venta-v2.html', skin_names=skin_names)
+
+@app.route('/create-PostVenta', methods=['POST'])
+@login_required
+def create_postventa():
+    try:
+        if current_user.is_authenticated:
+            data = request.get_json()
+
+            title = data.get('title')
+            skin_id = data.get('skin_id')
+            nombre = data.get('name')
+            price = data.get('price')
+            campeon= data.get('champion')
+            user_id = current_user.id
+            skin_imagen = os.path.join("static/campeones",f'{campeon}',f'{nombre}.jpg')
+
+            on_sale = True
+
+            # Obtener la skin asociada al usuario actual
+            skin = Skin.query.get(skin_id)
+            if not skin:
+                return jsonify({'success': False, 'message': 'Skin not found'})
+
+            # Crear una nueva instancia de Postventa
+            postventa = Postventa(title=title, user_id=user_id,nombre=nombre ,skin_id=skin_id,
+                                  campeon=campeon, skin_image=skin_imagen,
+                                  on_sale=on_sale, precio=int(price))
+            db.session.add(postventa)
             db.session.commit()
 
-            return jsonify({'success':True})
+            return jsonify({'success': True, 'title': title, 'user_id': user_id, 'skin_id': skin_id, 'on_sale': on_sale})
         else:
-            return jsonify({'success':False,'message':"user not authenticated"})
+            return jsonify({'success': False, 'message': 'Not logged in'})
     except Exception as e:
-        return jsonify({'succes':False,"message":'error desconocido'})
+        print(e)
+        print(sys.exc_info())
+        db.session.rollback()
+        return jsonify({'success': False, 'message': 'Error creating postventa'})
+    finally:
+        db.session.close()
 
+@app.route('/get-skin-details/<skin_id>', methods=['GET'])
+def get_skin_details(skin_id):
+    try:
+        skin = Skin.query.get(skin_id)
+        if skin:
+            return jsonify({
+                'success': True,
+                'champion': skin.champion_name,
+                'image': skin.image,
+                'name': skin.name
+            })
+        else:
+            return jsonify({'success': False, 'message': 'Skin not found'})
+    except Exception as e:
+        print(e)
+        print(sys.exc_info())
+        return jsonify({'success': False, 'message': 'Error retrieving skin details'})
 
-@app.route('/show-current',methods=['GET'])
+@app.route('/show-skins-current2')
 @login_required
-def show_current():
-    if current_user.is_authenticated:
-        return jsonify({"nickname":current_user.nickname,'email':current_user.e_mail,'saldo':current_user.saldo})
-    else:
-        return jsonify({"succes":False})
-    
+def show_skins_current2():
+    try:
+        if current_user.is_authenticated:
+            user_id = current_user.id
+            skins = Skin.query.filter_by(user_id=user_id).all()
 
-@app.route('/hito',methods=['GET'])
-def hito():
-    return render_template('compra_skins.html')
+            skins_list = []
+            for skin in skins:
+                skins_list.append({'id': skin.id, 'name': skin.name})
 
+            return jsonify({'success': True, 'skins': skins_list})
+        else:
+            return jsonify({'success': False, 'message': 'Not logged in'})
+    except Exception as e:
+        print(e)
+        return jsonify({'success': False, 'message': 'Error fetching skins'})
+# END CREAR POST DE VENTA
 
+# LOGICA DE COMPRA DE SKINS
 @app.route('/comprar-skin',methods=["POST"])
-@login_required
 def comprar_skin():        
     try:
         if current_user.is_authenticated:
@@ -595,10 +499,15 @@ def comprar_skin():
             elif current_user.saldo < int(precio):
                 return jsonify({'success':False,'message':'insufficient amount of money'})
             else:
-                current_user.saldo -= int(precio)
+                
+                precio = int(precio)
+                comision = precio * 0.05
+
+                current_user.saldo -= precio
+
 
                 seller = User.query.filter_by(id=seller_uid).first()
-                seller.saldo += int(precio)
+                seller.saldo += (precio - comision)
 
                 filename_seller = f'{seller_uid}.txt'
                 filepath_seller = os.path.join(f"{app.config['UPLOAD_FOLDER']}/{seller_uid}",filename_seller)
@@ -620,31 +529,62 @@ def comprar_skin():
                     file.write(str(skin_uid)+'\n')
                 file.close()
 
-                #
-
+                boleta = Transaccion(precio,comision,current_user.id,seller_uid,skin_uid)
+ 
                 skin = Skin.query.filter_by(id=skin_uid).first()
                 skin.user_id = current_user.id
                 
                 posteo.on_sale = False
-                
+
+                db.session.add(boleta)
                 db.session.commit()
 
                 return jsonify({'success':True,'current_user':current_user.id,'seller':seller.id,'skin_id':skin_uid,'precio':precio})
         else:
             return jsonify({'success':False,'message':'user not authenticated'})
     except Exception as e:
-        return jsonify({'success':False,'message':'error desconocido'})
+        return jsonify({'success':False,'message':str(e)})
+    finally:
+        db.session.close()
+# END LOGICA DE COMPRA DE SKINS
 
+# VER ALGUNOS DATOS JSON QUE SE ENVIARAN A LA BASE DE DATOS
+@app.route('/show-skins',methods=['GET']) # -- mostrar todas las skins --
+def showSkins():
+    try:
+        skins = Skin.query.all()
+        skins_serialized  = [skin.serialize() for skin in skins]
+        return jsonify({'success':True,"skins":skins_serialized}),200
+    except Exception as e:
+        return jsonify({"success":False})
 
-        
+@app.route('/show-posts',methods=['GET']) # -- mostrar todos los posts --
+def showPosts():
+    try:
+        posts = Postventa.query.filter_by(on_sale=True).all()
+        # posts = Postventa.query.all()
+        posts_serialized = [post.serialize() for post in posts]
+        return jsonify({'success':True,"serialized":posts_serialized})
+    except Exception as e:
+        return jsonify({"success":False})
+
+@app.route('/show-current',methods=['GET']) # -- mostrar datos del usuario actual --
+@login_required
+def show_current():
+    if current_user.is_authenticated:
+        return jsonify({"nickname":current_user.nickname,'email':current_user.e_mail,'saldo':current_user.saldo})
+    else:
+        return jsonify({"succes":False})
+# END VER ALGUNOS DATOS JSON QUE SE ENVIARAN A LA BASE DE DATOS    
 
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Corremos la aplicación: 
-
+# CORRER LA APP
 if __name__ == '__main__':
     app.run(debug=True)
 else:
     print('Importing {}'.format(__name__))
+
+

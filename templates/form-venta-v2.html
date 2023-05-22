@@ -1,0 +1,95 @@
+{% extends "base2.html" %}
+{% block title %}Post de venta{% endblock %}
+{%block body%}
+
+<div class="container">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+    const skinForm = document.getElementById('skinForm');
+    const skinNombre = document.getElementById('skin_nombre');
+
+    skinForm.addEventListener('submit', function(event) {
+        event.preventDefault(); // Evita el envío del formulario por defecto
+
+        const title = document.getElementById('title').value;
+        const skinId = skinNombre.value;
+        const skinName = skinNombre.options[skinNombre.selectedIndex].text;
+
+        const price = document.getElementById('price').value;
+
+        fetch(`/get-skin-details/${skinId}`)
+            .then((response) => response.json())
+            .then((responseJson) => {
+                const { success, champion, image, name} = responseJson;
+
+                if (success) {
+                    const data = {
+                        title: title,
+                        skin_id: skinId,
+                        price: price,
+                        champion: champion,
+                        image: image,
+                        name: skinName
+                    };
+
+                    fetch('/create-PostVenta', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    })
+                    .then((response) => response.json())
+                    .then((responseJson) => {
+                        console.log(responseJson);
+                        location.reload(); // Recarga la página
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
+                } else {
+                    console.error('Error:', responseJson.message);
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    });
+
+    fetch('/show-skins-current2')
+        .then((response) => response.json())
+        .then((responseJson) => {
+            const skins = responseJson.skins;
+            skins.forEach((skin) => {
+                const option = document.createElement('option');
+                option.value = skin.id;
+                option.innerHTML = skin.name;
+                skinNombre.appendChild(option);
+            });
+        });
+});
+
+    </script>
+    <div class="form-container">
+        <h1>Publicación de Skins</h1>
+        <form id="skinForm" action="/create-PostVenta" method="POST">
+            <div class="mb-3">
+                <label for="title" class="form-label">Título de la Publicación:</label>
+                <input type="text" class="form-control" id="title" name="title" required>
+            </div>
+            <div class="mb-3">
+                <label for="skin_nombre" class="form-label">Seleccionar Skin:</label>
+                <select class="form-control" id="skin_nombre" name="skin_nombre" required>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="price" class="form-label">Precio:</label>
+                <input type="number" class="form-control" id="price" name="price" required>
+            </div>
+            <button class="btn btn-primary" type="submit">Publicar</button>
+        </form>
+    </div>
+</div>
+
+
+{%endblock%}

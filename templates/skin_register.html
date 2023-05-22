@@ -1,0 +1,39 @@
+{% extends "base2.html"%}
+{%block title%} market {%endblock%}
+{%block stile%}
+{%endblock%}
+{%block body%}
+    <h1>Skin Register</h1>
+    <section>
+        <form action="/register-skin" method="POST">
+            <div>
+                <label for="name">Name</label>
+                <select id="name" name="name">
+                    <option value="Gragas_camorrista">Camorrista_G</option>
+                    <option value="gragas_shrek">Shrek_G</option>
+                    <option value="cosmico">Cosmico_J</option>
+                    <option value="virtuoso">virtuoso_J</option>
+                    <option value="Shen_Surgeon">Surgeon_S</option>
+                    <option value="Warlord_shen">Warlord_S</option>
+                </select>
+            </div>
+            <div>
+                <label for="champion_name">Champion Name</label>
+                <select id="champion_name" name="champion_name">
+                    <option value="Gragas">Gragas</option>
+                    <option value="jhin">Jhin</option>
+                    <option value="Shen">Shen</option>
+                </select>
+            </div>
+            <div>
+                <label for="rarity">Rarity</label>
+                <select id="rarity" name="rarity">
+                    <option value="Pro">Legendary</option>
+                    <option value="Normal">Epic</option>
+                    <option value="Pobre">Normal</option>
+                </select>
+                </div>     
+            <input type="submit" value="Submit" onclick="index(0)">       
+        </form>
+    </section>
+    {%endblock%}
