@@ -292,7 +292,9 @@ def login():
 @app.route('/market',methods=['GET'])
 @login_required
 def market():
-    return render_template('market2.html')
+    if current_user.is_authenticated:
+        saldo = current_user.saldo
+        return render_template('market2.html', saldo = saldo)
 # END PAGINA PRINCIPAL
 
 # CONFIGURACION USER
@@ -401,31 +403,28 @@ def update_user():
         return jsonify({'success': False, 'message': 'Error al actualizar los datos del usuario'})
     finally:
         session.close()
+# END CONFIGURACION USER
 
-
-
-
-
-
-
-
-
-
-
+# CREAR POST DE VENTA
 @app.route('/make_post',methods=['GET'])
 @login_required
 def make_post():
     return render_template('form-venta-v2.html')
 
+@app.route('/make_post')
+@login_required
+def skins():
+    user = current_user  # Obtiene el usuario actual autenticado
+    skin_ids = user.skin_hashes.split('\n') if user.skin_hashes else []  # Convierte los IDs de las skins en una lista
 
+    # Obtiene las skins correspondientes a los IDs del usuario actual
+    skins = Skin.query.filter(Skin.id.in_(skin_ids)).all()
 
+    # Crea una lista de nombres de las skins del usuario
+    skin_names = [skin.nombres for skin in skins]
 
+    return render_template('form-venta-v2.html', skin_names=skin_names)
 
-@app.route('/test-post', methods=["GET"])
-def postventas():
-    return render_template('formVenta.html')
-
-##########################################################################################################
 @app.route('/create-PostVenta', methods=['POST'])
 @login_required
 def create_postventa():
@@ -466,7 +465,6 @@ def create_postventa():
     finally:
         db.session.close()
 
-
 @app.route('/get-skin-details/<skin_id>', methods=['GET'])
 def get_skin_details(skin_id):
     try:
@@ -484,11 +482,6 @@ def get_skin_details(skin_id):
         print(e)
         print(sys.exc_info())
         return jsonify({'success': False, 'message': 'Error retrieving skin details'})
-
-
-
-
-
 
 @app.route('/show-skins-current2')
 @login_required
@@ -508,24 +501,41 @@ def show_skins_current2():
     except Exception as e:
         print(e)
         return jsonify({'success': False, 'message': 'Error fetching skins'})
+# END CREAR POST DE VENTA
+
+
+
+
+
+
+
+
+
+
+
+
+@app.route('/test-post', methods=["GET"])
+def postventas():
+    return render_template('formVenta.html')
 
 ##########################################################################################################
 
 
 
-@app.route('/make_post')
-@login_required
-def skins():
-    user = current_user  # Obtiene el usuario actual autenticado
-    skin_ids = user.skin_hashes.split('\n') if user.skin_hashes else []  # Convierte los IDs de las skins en una lista
 
-    # Obtiene las skins correspondientes a los IDs del usuario actual
-    skins = Skin.query.filter(Skin.id.in_(skin_ids)).all()
 
-    # Crea una lista de nombres de las skins del usuario
-    skin_names = [skin.nombres for skin in skins]
 
-    return render_template('form-venta-v2.html', skin_names=skin_names)
+
+
+
+
+
+
+##########################################################################################################
+
+
+
+
 
 
 
@@ -551,102 +561,11 @@ def showPosts():
     except Exception as e:
         return jsonify({"success":False})
 
-@app.route('/change-saldo/<dato>',methods=['GET'])
-@login_required
-def change_saldo(dato):
-    if current_user.is_authenticated:
-        if current_user.saldo != None:
-            current_user.saldo += int(dato)
-            db.session.commit()
-            return jsonify({'success':True})
-        else:
-            current_user.saldo = int(dato)
-            db.session.commit()
-            return jsonify({'success':True})
-    else:
-        return jsonify({'success':False,'message':'User not authenticated'})
-
-
-@app.route('/change-nickname',methods=['POST'])
-@login_required
-def change_nickname():
-    try:
-        dato = request.form.get('new_nickname')
-        if current_user.is_authenticated:
-            current_user.nickname = dato
-            db.session.commit()
-            return jsonify({'success':True})
-        else:
-            return jsonify({'success':False,'message':"user not authenticated"})
-    except Exception as e:
-        return jsonify({'succes':False,"message":'error desconocido'})
 
 
 
-@app.route('/change-e_mail',methods=['POST'])
-@login_required
-def change_e_mail():
-    try:
-        dato = request.form.get('new_e_mail')
-        if current_user.is_authenticated:
-            current_user.nickname = dato
-            db.session.commit()
-            return jsonify({'success':True})
-        else:
-            return jsonify({'success':False,'message':"user not authenticated"})
-    except Exception as e:
-        return jsonify({'succes':False,"message":'error desconocido'})
 
 
-
-@app.route('/change-password',methods=['POST'])
-@login_required
-def change_password():
-    try:
-        dato = request.form.get('new_password')
-        if current_user.is_authenticated:
-            current_user.nickname = dato
-            db.session.commit()
-            return jsonify({'success':True})
-        else:
-            return jsonify({'success':False,'message':"user not authenticated"})
-    except Exception as e:
-        return jsonify({'succes':False,"message":'error desconocido'})
-
-
-
-@app.route('/change-image',methods=['POST'])
-@login_required
-def change_image():
-    try:
-
-        if current_user.is_authenticated:
-            if 'image' not in request.files:
-                return  jsonify({'success':False,'message':'No image provided by the user'}),400
-        
-            file = request.files['image']
-
-            if file.filename == '':
-                return jsonify({'success':False,'message':'No image selected'}), 400
-
-            if not allowed_file(file.filename):
-                return jsonify({'success':False, 'message':'Image format not allowed'}), 400
-            
-            dato = request.form.get('new_password')
-            cwd = os.getcwd()
-
-            user_dir = os.path.join(app.config['UPLOAD_FOLDER'], current_user.id)
-            os.makedirs(user_dir,exist_ok=True)
-            upload_folder = os.path.join(cwd,user_dir)
-            file.save(os.path.join(upload_folder,file.filename))
-            current_user.image = file.filename
-            db.session.commit()
-
-            return jsonify({'success':True})
-        else:
-            return jsonify({'success':False,'message':"user not authenticated"})
-    except Exception as e:
-        return jsonify({'succes':False,"message":'error desconocido'})
 
 
 @app.route('/show-current',methods=['GET'])
