@@ -357,7 +357,50 @@ def register_skin():
     finally:
         db.session.close()
 
+@app.route('/add_skins',methods=["GET"])
+def prueba():
+    return render_template('skin_register.html')
 
+# -- cambiar datos --
+from sqlalchemy.orm import Session
+
+@app.route('/update-user', methods=['POST'])
+def update_user():
+    try:
+        # Obtener los datos del formulario
+        username = request.form.get('username')
+        profile_picture = request.files.get('profile-picture')
+        balance = request.form.get('balance')
+
+        # Actualizar los datos del usuario en la base de datos
+        if current_user.is_authenticated:
+            if username or balance or profile_picture:
+                if username:
+                    current_user.nickname = username
+
+                if balance:
+                    if current_user.saldo is not None:
+                        current_user.saldo += int(balance)
+                    else:
+                        current_user.saldo = int(balance)
+
+                if profile_picture:
+                    # Guardar la imagen de perfil en el servidor
+                    current_user.profile_picture = profile_picture
+
+                session = Session.object_session(current_user)
+                session.commit()
+                return redirect('market')
+            else:
+                return jsonify({'success': False, 'message': 'No se proporcionaron datos para actualizar'})
+        else:
+            return jsonify({'success': False, 'message': 'Usuario no autenticado'})
+    except Exception as e:
+        print(e)
+        session.rollback()
+        return jsonify({'success': False, 'message': 'Error al actualizar los datos del usuario'})
+    finally:
+        session.close()
 
 
 
@@ -486,39 +529,7 @@ def skins():
 
 
 
-@app.route('/update-user', methods=['POST'])
-def update_user():
-    try:
-        # Obtener los datos del formulario
-        username = request.form.get('username')
-        profile_picture = request.files.get('profile-picture')
-        balance = request.form.get('balance')
 
-        # Actualizar los datos del usuario en la base de datos
-        if current_user.is_authenticated:
-            if username != "" or balance != "" or profile_picture:
-                if username != "":
-                    current_user.nickname = username
-
-                if balance != "":
-                    if current_user.saldo is not None:
-                        current_user.saldo += int(balance)
-                    else:
-                        current_user.saldo = int(balance)
-                if profile_picture is not None:
-                    profile_picture.save('profile_picture.jpg')
-
-            db.session.commit()
-            return redirect('market')
-        else:
-            return jsonify({'success': False, 'message': 'User not authenticated'})
-    except Exception as e:
-        print(e)
-        print(sys.exc_info())
-        db.session.rollback()
-        return jsonify({'success': False, 'message': 'Error updating user data'})
-    finally:
-        db.session.close()
 
 
 @app.route('/show-skins',methods=['GET'])
