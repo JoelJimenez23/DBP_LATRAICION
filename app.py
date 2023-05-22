@@ -13,7 +13,7 @@ from flask_login import login_user,login_required,current_user,LoginManager,User
 app = Flask(__name__)
 login_manager = LoginManager()
 login_manager.init_app(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:1234@localhost:5432/s"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:1234@localhost:5432/skinlootfinal"
 app.config['UPLOAD_FOLDER'] = 'static/usuarios'
 app.secret_key = 'clave'
 db = SQLAlchemy(app)
@@ -121,37 +121,34 @@ class Postventa(db.Model):
 class Transaccion(db.Model):
     __tablename__ = 'transacciones'
     id = db.Column(db.String(36), primary_key=True, unique=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
-    fecha_inicio = db.Column(db.DateTime, nullable=False)
+    fecha = db.Column(db.DateTime(timezone=True), nullable=False, server_default=db.text("now()"))
     precio = db.Column(db.Float, nullable=False)
     comision = db.Column(db.Float, nullable=False)
-    nombre_comprador = db.Column(db.String(100), nullable=False)
-    nombre_vendedor = db.Column(db.String(100), nullable=False)
-    nombre_skin = db.Column(db.String(100), nullable=False)
-    empresa_id = db.Column(db.String(36), db.ForeignKey('empresas.id'), nullable=False)
+    id_comprador = db.Column(db.String(36), nullable=False)
+    id_vendedor = db.Column(db.String(100), nullable=False)
+    id_skin = db.Column(db.String(100), nullable=False)
 
-    def __init__(self, fecha_inicio, precio, comision, nombre_comprador, nombre_vendedor, nombre_skin, empresa_id):
-        self.fecha_inicio = fecha_inicio
+    def __init__(self,precio, comision, id_comprador, id_vendedor, id_skin):
         self.precio = precio
         self.comision = comision
-        self.nombre_comprador = nombre_comprador
-        self.nombre_vendedor = nombre_vendedor
-        self.nombre_skin = nombre_skin
-        self.empresa_id = empresa_id
+        self.id_comprador = id_comprador
+        self.id_vendedor = id_vendedor
+        self.id_skin = id_skin
 
     def serialize(self):
         return {
             'id': self.id,
-            'fecha_inicio': self.fecha_inicio,
+            'fecha': self.fecha,
             'precio': self.precio,
             'comision': self.comision,
-            'nombre_comprador': self.nombre_comprador,
-            'nombre_vendedor': self.nombre_vendedor,
-            'nombre_skin': self.nombre_skin,
-            'empresa_id': self.empresa_id
+            'id_comprador': self.id_comprador,
+            'id_vendedor': self.id_vendedor,
+            'id_skin': self.id_skin,
         }
     
 class Trade(db.Model):
     __tablename__ = 'trades'
+
     id = db.Column(db.String(36), primary_key=True, unique=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
     fecha_inicio = db.Column(db.DateTime, nullable=False)
     nombre_comprador = db.Column(db.String(100), nullable=False)
@@ -176,24 +173,6 @@ class Trade(db.Model):
             'nombre_skin_vendedor': self.nombre_skin_vendedor
         }
     
-class Empresa(db.Model):
-    __tablename__ = 'empresas'
-    id = db.Column(db.String(36), primary_key=True, unique=True, default=lambda: str(uuid.uuid4()), server_default=db.text("uuid_generate_v4()"))
-    ganancias = db.Column(db.Float, nullable=False)
-    cantidad_usuarios = db.Column(db.Integer, nullable=False)
-    transacciones = db.relationship('Transaccion', backref='empresa', lazy=True)
-
-    def __init__(self, ganancias, cantidad_usuarios):
-        self.ganancias = ganancias
-        self.cantidad_usuarios = cantidad_usuarios
-
-    def serialize(self):
-        return {
-            'id': self.id,
-            'ganancias': self.ganancias,
-            'cantidad_usuarios': self.cantidad_usuarios,
-            'transacciones': [transaccion.serialize() for transaccion in self.transacciones]
-        }
 # END MODELOS
 
 # CREACION Y ELIMINACION DE TABLAS
@@ -503,87 +482,8 @@ def show_skins_current2():
         return jsonify({'success': False, 'message': 'Error fetching skins'})
 # END CREAR POST DE VENTA
 
-
-
-
-
-
-
-
-
-
-
-
-@app.route('/test-post', methods=["GET"])
-def postventas():
-    return render_template('formVenta.html')
-
-##########################################################################################################
-
-
-
-
-
-
-
-
-
-
-
-
-##########################################################################################################
-
-
-
-
-
-
-
-
-
-
-@app.route('/show-skins',methods=['GET'])
-def showSkins():
-    try:
-        skins = Skin.query.all()
-        skins_serialized  = [skin.serialize() for skin in skins]
-        return jsonify({'success':True,"skins":skins_serialized}),200
-    except Exception as e:
-        return jsonify({"success":False})
-
-@app.route('/show-posts',methods=['GET'])
-def showPosts():
-    try:
-        posts = Postventa.query.filter_by(on_sale=True).all()
-        # posts = Postventa.query.all()
-        posts_serialized = [post.serialize() for post in posts]
-        return jsonify({'success':True,"serialized":posts_serialized})
-    except Exception as e:
-        return jsonify({"success":False})
-
-
-
-
-
-
-
-
-@app.route('/show-current',methods=['GET'])
-@login_required
-def show_current():
-    if current_user.is_authenticated:
-        return jsonify({"nickname":current_user.nickname,'email':current_user.e_mail,'saldo':current_user.saldo})
-    else:
-        return jsonify({"succes":False})
-    
-
-@app.route('/hito',methods=['GET'])
-def hito():
-    return render_template('compra_skins.html')
-
-
+# LOGICA DE COMPRA DE SKINS
 @app.route('/comprar-skin',methods=["POST"])
-@login_required
 def comprar_skin():        
     try:
         if current_user.is_authenticated:
@@ -599,10 +499,15 @@ def comprar_skin():
             elif current_user.saldo < int(precio):
                 return jsonify({'success':False,'message':'insufficient amount of money'})
             else:
-                current_user.saldo -= int(precio)
+                
+                precio = int(precio)
+                comision = precio * 0.05
+
+                current_user.saldo -= precio
+
 
                 seller = User.query.filter_by(id=seller_uid).first()
-                seller.saldo += int(precio)
+                seller.saldo += (precio - comision)
 
                 filename_seller = f'{seller_uid}.txt'
                 filepath_seller = os.path.join(f"{app.config['UPLOAD_FOLDER']}/{seller_uid}",filename_seller)
@@ -624,30 +529,59 @@ def comprar_skin():
                     file.write(str(skin_uid)+'\n')
                 file.close()
 
-                #
-
+                boleta = Transaccion(precio,comision,current_user.id,seller_uid,skin_uid)
+ 
                 skin = Skin.query.filter_by(id=skin_uid).first()
                 skin.user_id = current_user.id
                 
                 posteo.on_sale = False
-                
+
+                db.session.add(boleta)
                 db.session.commit()
 
                 return jsonify({'success':True,'current_user':current_user.id,'seller':seller.id,'skin_id':skin_uid,'precio':precio})
         else:
             return jsonify({'success':False,'message':'user not authenticated'})
     except Exception as e:
-        return jsonify({'success':False,'message':'error desconocido'})
+        return jsonify({'success':False,'message':str(e)})
+    finally:
+        db.session.close()
+# END LOGICA DE COMPRA DE SKINS
 
+# VER ALGUNOS DATOS JSON QUE SE ENVIARAN A LA BASE DE DATOS
+@app.route('/show-skins',methods=['GET']) # -- mostrar todas las skins --
+def showSkins():
+    try:
+        skins = Skin.query.all()
+        skins_serialized  = [skin.serialize() for skin in skins]
+        return jsonify({'success':True,"skins":skins_serialized}),200
+    except Exception as e:
+        return jsonify({"success":False})
 
-        
+@app.route('/show-posts',methods=['GET']) # -- mostrar todos los posts --
+def showPosts():
+    try:
+        posts = Postventa.query.filter_by(on_sale=True).all()
+        # posts = Postventa.query.all()
+        posts_serialized = [post.serialize() for post in posts]
+        return jsonify({'success':True,"serialized":posts_serialized})
+    except Exception as e:
+        return jsonify({"success":False})
+
+@app.route('/show-current',methods=['GET']) # -- mostrar datos del usuario actual --
+@login_required
+def show_current():
+    if current_user.is_authenticated:
+        return jsonify({"nickname":current_user.nickname,'email':current_user.e_mail,'saldo':current_user.saldo})
+    else:
+        return jsonify({"succes":False})
+# END VER ALGUNOS DATOS JSON QUE SE ENVIARAN A LA BASE DE DATOS    
 
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Corremos la aplicación: 
-
+# CORRER LA APP
 if __name__ == '__main__':
     app.run(debug=True)
 else:
